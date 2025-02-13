@@ -1,5 +1,16 @@
-# airp&p
-sdfsdf
-## hola
-
-asdsdsd
+# Proyecto AirPNP
+## Explicacion idea del proyecto
+...
+## Nuestros Objetivos
+...
+## Tecnologias Usadas
+...
+## Diagramas
+...
+## Pagina Web
+### Mockup
+### Paleta De Colores
+### Logo
+### Funcionalidades Web
+...
+## Roadmap/Trello/Gantt
