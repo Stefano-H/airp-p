@@ -161,7 +161,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#000',
   },
   label: {
@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
     borderRadius: 15,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#000',
     justifyContent: 'center',
     alignItems: 'center',
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: '#FFF',
     borderRadius: 10,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#000',
   },
   booleanRow: {

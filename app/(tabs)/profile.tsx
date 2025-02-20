@@ -90,9 +90,9 @@ import {
                 </TouchableOpacity>
               </View>
               <Text>{email}</Text>
-              <TextInput placeholder="Ubicación" value={location} onChangeText={setLocation} editable={edit} style={defaultStyles.inputField} />
+              {/* <TextInput placeholder="Ubicación" value={location} onChangeText={setLocation} editable={edit} style={defaultStyles.inputField} />
               <TextInput placeholder="Teléfono" value={phone} onChangeText={setPhone} editable={edit} style={defaultStyles.inputField} />
-              <TextInput placeholder="Descripción" value={bio} onChangeText={setBio} editable={edit} multiline style={[defaultStyles.inputField, { height: 80 }]} />
+              <TextInput placeholder="Descripción" value={bio} onChangeText={setBio} editable={edit} multiline style={[defaultStyles.inputField, { height: 80 }]} /> */}
               {isHost && (
                 <Link href={'/admin/properties'} asChild>
                   <Button title="Administrar Propiedades" color={Colors.dark} />

@@ -2,24 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Stack, useRouter } from 'expo-router'; // Importar useRouter
 import { useForm } from '@/context/FormContext'; // Importar el contexto
+import { MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
 
 export default function Paso1_5() {
   const { formData, updateFormData } = useForm(); // Accede a los datos y funciones del contexto
   // Mapeo de reglas para mostrar texto legible y emojis
-  const reglasLegibles = {
-    no_smoking: { label: 'No fumar', emoji: '🚭' },
-    no_fiestas: { label: 'No fiestas', emoji: '🎉' },
-    horas_de_silencio: { label: 'Horas de silencio', emoji: '🤫' },
-    no_mascotas: { label: 'No mascotas', emoji: '🐕' },
-    estrictos_en_el_check_in: { label: 'Estrictos en el check-in', emoji: '⏰' },
-    estrictos_en_el_check_out: { label: 'Estrictos en el check-out', emoji: '⏰' },
-    maximos_invitados_permitidos: { label: 'Máximo de invitados', emoji: '👥' },
-    respectar_las_reglas_de_la_comunidad: { label: 'Respetar reglas comunidad', emoji: '🏘️' },
-    no_mover_los_muebles: { label: 'No mover los muebles', emoji: '🛋️' },
-    limpieza_basica: { label: 'Limpieza básica', emoji: '🧹' },
-    areas_restringidas: { label: 'Áreas restringidas', emoji: '🚷' },
-  };
 
+  const reglasLegibles = {
+    no_smoking: { label: "No fumar", icon: <MaterialIcons name="smoke-free" size={24} color="black" /> },
+    no_fiestas: { label: "No fiestas", icon: <FontAwesome5 name="glass-cheers" size={24} color="black" /> },
+    horas_de_silencio: { label: "Horas de silencio", icon: <MaterialIcons name="volume-off" size={24} color="black" /> },
+    no_mascotas: { label: "No mascotas", icon: <MaterialIcons name="pets" size={24} color="black" /> },
+    estrictos_en_el_check_in: { label: "Estrictos en el check-in", icon: <MaterialIcons name="access-time" size={24} color="black" /> },
+    estrictos_en_el_check_out: { label: "Estrictos en el check-out", icon: <MaterialIcons name="access-time" size={24} color="black" /> },
+    maximos_invitados_permitidos: { label: "Máximo de invitados", icon: <FontAwesome5 name="user-friends" size={24} color="black" /> },
+    respectar_las_reglas_de_la_comunidad: { label: "Respetar reglas comunidad", icon: <MaterialIcons name="home" size={24} color="black" /> },
+    no_mover_los_muebles: { label: "No mover los muebles", icon: <MaterialIcons name="weekend" size={24} color="black" /> },
+    limpieza_basica: { label: "Limpieza básica", icon: <MaterialIcons name="cleaning-services" size={24} color="black" /> },
+    areas_restringidas: { label: "Áreas restringidas", icon: <MaterialIcons name="block" size={24} color="black" /> },
+  };
+  
   const [reglas, setReglas] = useState({
     no_smoking: false,
     no_fiestas: false,
@@ -75,7 +77,7 @@ export default function Paso1_5() {
           onPress={() => toggleRegla(key)}
         >
           <View style={styles.optionContent}>
-            <Text style={styles.optionIcon}>{reglasLegibles[key].emoji}</Text>
+            <Text style={styles.optionIcon}>{reglasLegibles[key].icon}</Text>
             <Text style={styles.optionText}>{reglasLegibles[key].label}</Text>
           </View>
           <Text style={styles.checkbox}>{reglas[key] ? '✔' : '○'}</Text>

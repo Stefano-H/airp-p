@@ -105,8 +105,10 @@ ROW_FORMAT = DYNAMIC;
 CREATE TABLE IF NOT EXISTS `airbnb`.`propietario` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `foto_url` VARCHAR(255) DEFAULT NULL,
+  `id_usuario` VARCHAR(255) DEFAULT NULL,
   `nombre_propietario` VARCHAR(255) DEFAULT NULL,
   `fecha_de_creación_de_cuenta` DATE DEFAULT NULL,
+  `verificado` TINYINT(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   CONSTRAINT `propietario_ibfk_1`
     FOREIGN KEY (`id`)
@@ -149,7 +151,7 @@ INSERT INTO `airbnb`.`reglas` (`id`, `no_smoking`, `no_fiestas`, `horas_de_silen
 
 INSERT INTO `airbnb`.`servicios` (`id`, `wifi`, `aire_acondicionado`, `calefacción`, `lavadora`, `plancha`, `toallas`, `detector_de_humo`, `detector_de_monoxido_de_carbono`) VALUES ('1', '1', '1', '1', '1', '1', '1', '1', '1');
 
-INSERT INTO `airbnb`.`propietario` (`id`, `foto_url`, `nombre_propietario`, `fecha_de_creación_de_cuenta`) VALUES ('1', 'https://a0.muscache.com/im/pictures/miso/Hosting-45306806/original/2c52733a-78b3-421d-a49a-bea959ab86da.jpeg', 'Marcos', '27/01/2025');
+INSERT INTO `airbnb`.`propietario` (`id`, `foto_url`, `id_usuario`, `nombre_propietario`, `fecha_de_creación_de_cuenta`, `verificado`) VALUES ('1', 'https://a0.muscache.com/im/pictures/miso/Hosting-45306806/original/2c52733a-78b3-421d-a49a-bea959ab86da.jpeg', ' ', 'Marcos', '27/01/2025', '0');
 
 
 /*Apartamento 2 */
@@ -163,7 +165,7 @@ INSERT INTO `airbnb`.`reglas` (`id`, `no_smoking`, `no_fiestas`, `horas_de_silen
 
 INSERT INTO `airbnb`.`servicios` (`id`, `wifi`, `aire_acondicionado`, `calefacción`, `lavadora`, `plancha`, `toallas`, `detector_de_humo`, `detector_de_monoxido_de_carbono`) VALUES ('2', '1', '1', '1', '1', '1', '1', '1', '1');
 
-INSERT INTO `airbnb`.`propietario` (`id`, `foto_url`, `nombre_propietario`, `fecha_de_creación_de_cuenta`) VALUES ('2', 'https://a0.muscache.com/im/pictures/miso/Hosting-45306806/original/2c52733a-78b3-421d-a49a-bea959ab86da.jpeg', 'Marcos', '27/01/2025');
+INSERT INTO `airbnb`.`propietario` (`id`, `foto_url`, `id_usuario`, `nombre_propietario`, `fecha_de_creación_de_cuenta`, `verificado`) VALUES ('2', 'https://a0.muscache.com/im/pictures/miso/Hosting-45306806/original/2c52733a-78b3-421d-a49a-bea959ab86da.jpeg', ' ', 'Marcos', '27/01/2025', '0');
 
 
 /*Apartamento 3 */
@@ -182,5 +184,5 @@ INSERT INTO `airbnb`.`reglas` (`id`, `no_smoking`, `no_fiestas`, `horas_de_silen
 INSERT INTO `airbnb`.`servicios` (`id`, `wifi`, `aire_acondicionado`, `calefacción`, `lavadora`, `plancha`, `toallas`, `detector_de_humo`, `detector_de_monoxido_de_carbono`) VALUES 
 ('3', '1', '1', '0', '1', '1', '1', '1', '1');
 
-INSERT INTO `airbnb`.`propietario` (`id`, `foto_url`, `nombre_propietario`, `fecha_de_creación_de_cuenta`) VALUES 
-('3', 'https://a0.muscache.com/im/pictures/miso/Hosting-45306806/original/2c52733a-78b3-421d-a49a-bea959ab86da.jpeg', 'Andrea', '15/05/2022');
+INSERT INTO `airbnb`.`propietario` (`id`, `foto_url`, `id_usuario`, `nombre_propietario`, `fecha_de_creación_de_cuenta`, `verificado`) VALUES 
+('3', 'https://a0.muscache.com/im/pictures/miso/Hosting-45306806/original/2c52733a-78b3-421d-a49a-bea959ab86da.jpeg', ' ', 'Andrea', '15/05/2022', '0');

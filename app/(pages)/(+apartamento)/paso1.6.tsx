@@ -12,7 +12,7 @@ export default function Paso1_6() {
 
   const handleTituloChange = (text: string) => setTitulo(text);
   const handleDescripcionChange = (text: string) => setDescripcion(text);
-  
+
   const handlePrecioChange = (text: string) => {
     const formattedText = text.replace(/[^0-9]/g, ''); // Solo permite números
     setPrecio(formattedText);
@@ -69,15 +69,22 @@ export default function Paso1_6() {
       {/* Contenedor de Precio por Noche */}
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Precio por Noche</Text>
-        <TextInput
-          style={styles.precioInput}
-          value={precio}
-          onChangeText={handlePrecioChange}
-          placeholder="Precio"
-          keyboardType="numeric"
-          maxLength={6}
-        />
+        <View style={styles.precioRow}>
+          <View style={styles.currencyContainer}>
+            <Text style={styles.currency}>€</Text>
+          </View>
+          <TextInput
+            style={styles.precioInput}
+            value={precio}
+            onChangeText={handlePrecioChange}
+            placeholder="Precio"
+            keyboardType="numeric"
+            maxLength={6}
+          />
+        </View>
       </View>
+
+
 
       <TouchableOpacity
         style={[styles.nextButton, !isNextButtonEnabled && styles.disabledButton]}
@@ -97,66 +104,54 @@ export default function Paso1_6() {
 
 const styles = StyleSheet.create({
   // Contenedor principal
-  container: { 
-    padding: 20, 
-    backgroundColor: '#FCFAFA', 
-    flexGrow: 1 
+  container: {
+    padding: 20,
+    backgroundColor: '#FCFAFA',
+    flexGrow: 1
   },
 
   // Título
-  title: { 
-    fontSize: 22, 
-    fontWeight: 'bold', 
-    textAlign: 'center', 
-    marginBottom: 10 
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 10
   },
 
   // Subtítulo
-  subtitle: { 
-    fontSize: 14, 
-    textAlign: 'center', 
-    marginBottom: 20, 
-    color: '#555' 
+  subtitle: {
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#555'
   },
 
   // Contenedor del input
-  inputContainer: { 
-    marginBottom: 15 
+  inputContainer: {
+    marginBottom: 15
   },
 
   // Etiquetas (labels) visibles
-  label: { 
-    fontSize: 16, 
-    fontWeight: 'bold', 
-    marginBottom: 5 
+  label: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5
   },
 
   // Estilo del input de Título
-  input: { 
-    height: 40, 
-    borderRadius: 8, 
-    paddingLeft: 10, 
-    marginBottom: 10, 
-    borderWidth: 2, 
-    borderColor: '#000' 
-  },
-
-  // Estilo del input de Precio por Noche (más estrecho)
-  precioInput: {
+  input: {
     height: 40,
-    width: '30%', // Contenedor más pequeño solo para número
-    borderWidth: 2,
-    borderColor: '#000',
     borderRadius: 8,
     paddingLeft: 10,
-    fontSize: 16,
-    marginBottom: 15,
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#000'
   },
 
   // Estilo del input de Descripción (más ancho y con borde negro)
   descriptionInput: {
     height: 100,
-    borderWidth: 2,
+    borderWidth: 1,
     borderColor: '#000',
     borderRadius: 8,
     paddingLeft: 10,
@@ -165,24 +160,24 @@ const styles = StyleSheet.create({
   },
 
   // Pie de página (footer) con botones de navegación
-  footer: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    marginTop: 20 
+  footer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20
   },
 
   // Estilo de los botones de navegación
-  navButton: { 
-    padding: 10, 
-    backgroundColor: '#007AFF', 
-    borderRadius: 8, 
-    width: '45%', 
-    alignItems: 'center' 
+  navButton: {
+    padding: 10,
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    width: '45%',
+    alignItems: 'center'
   },
 
-  navButtonText: { 
-    color: '#fff', 
-    fontSize: 16 
+  navButtonText: {
+    color: '#fff',
+    fontSize: 16
   },
 
   // Estilo del botón "Siguiente"
@@ -218,5 +213,37 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000'
   },
+
+  precioRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+
+  currencyContainer: {
+    backgroundColor: "#f0f0f0",
+    paddingHorizontal: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    borderTopLeftRadius: 8,
+    borderBottomLeftRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
+  },
+
+  currency: {
+    fontSize: 18,
+    color: "black",
+  },
+
+  precioInput: {
+    flex: 1,
+    height: 40,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderTopRightRadius: 8,
+    borderBottomRightRadius: 8,
+    paddingHorizontal: 10,
+  },
+
 });
 

@@ -440,13 +440,15 @@ app.post('/create-listing', async (req, res) => {
 
     // 6. Insertar en la tabla propietario
     const queryPropietario = `
-      INSERT INTO propietario (foto_url, nombre_propietario, fecha_de_creación_de_cuenta)
-      VALUES (?, ?, ?)
+      INSERT INTO propietario (foto_url, id_usuario, nombre_propietario, fecha_de_creación_de_cuenta, verificado)
+      VALUES (?, ?, ?, ?, ?)
     `;
     const propietarioValues = [
       paso1_6?.propietarioFoto || null,
       id_clerk || 'Desconocido',
-      new Date() // Fecha actual
+      'Desconocido',
+      new Date(), // Fecha actual
+      0
     ];
     await pool.query(queryPropietario, propietarioValues);
 

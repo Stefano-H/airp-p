@@ -72,10 +72,10 @@ export default function Resumen() {
         <Text style={styles.stepTitle}>Paso 1.3 - Información del espacio</Text>
         {formData.paso1_3 ? (
           <Text style={styles.stepDescription}>
-            👤 Huéspedes: {formData.paso1_3.huespedes}{"\n"}
-            🛏️ Dormitorios: {formData.paso1_3.dormitorios}{"\n"}
-            🛌 Camas: {formData.paso1_3.camas}{"\n"}
-            🚿 Baños: {formData.paso1_3.baños}{"\n"}
+            Huéspedes: {formData.paso1_3.huespedes}{"\n"}
+            Dormitorios: {formData.paso1_3.dormitorios}{"\n"}
+            Camas: {formData.paso1_3.camas}{"\n"}
+            Baños: {formData.paso1_3.baños}{"\n"}
             Parking: {formData.paso1_3.parking}{"\n"}
             Piscina: {formData.paso1_3.piscina}{"\n"}
             Gimnasio: {formData.paso1_3.gimnasio}{"\n"}
@@ -126,9 +126,9 @@ export default function Resumen() {
         <Text style={styles.stepTitle}>Paso 1.6 - Detalles Adicionales</Text>
         {formData.paso1_6 ? (
           <Text style={styles.stepDescription}>
-            📋 Título: {formData.paso1_6.titulo}{"\n"}
-            📝 Descripción: {formData.paso1_6.descripcion}{"\n"}
-            💵 Precio: {formData.paso1_6.precio}
+            Título: {formData.paso1_6.titulo}{"\n"}
+            Descripción: {formData.paso1_6.descripcion}{"\n"}
+            Precio: {formData.paso1_6.precio}
           </Text>
         ) : (
           <Text style={styles.stepDescription}>No se han registrado detalles adicionales.</Text>

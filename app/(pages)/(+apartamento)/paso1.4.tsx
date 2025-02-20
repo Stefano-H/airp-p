@@ -52,7 +52,7 @@ export default function Paso1_4() {
           headerTitleStyle: { fontFamily: 'mon-b', fontSize: 24, marginTop: 20 },
         }}
       />
-      <Text style={styles.title}>🏡 Servicios incluidos en tu espacio</Text>
+      <Text style={styles.title}>Servicios incluidos en tu espacio</Text>
       <Text style={styles.subtitle}>Selecciona los servicios que ofreces a tus huéspedes</Text>
 
       <View style={styles.optionsContainer}>
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   },
   optionSelected: {
     backgroundColor: 'black',
-    borderColor: '#007AFF',
+    borderColor: 'black',
   },
   optionText: {
     fontSize: 16,
