@@ -10,6 +10,8 @@
 ![Descripción de la imagen](Media/DiagramaDeClases.png)
 ### Diagrama de Secuencia
 ![Descripción de la imagen](Media/DiagramaDeSecuencia.png)
+### Diagrama de Casos de Uso
+![Descripción de la imagen](Media/DiagramaCasosDeUso.png)
 ## Pagina Web
 ### Mockup
 ![Descripción de la imagen](Media/Mockup.png)
