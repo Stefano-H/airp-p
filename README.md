@@ -1,4 +1,4 @@
-# Proyecto AirPNP
+# Proyecto AirP&P
 ## Explicacion idea del proyecto
 ...
 ## Nuestros Objetivos
