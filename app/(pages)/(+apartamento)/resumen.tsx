@@ -21,7 +21,7 @@ export default function Resumen() {
       const response = await fetch(`${API_BASE_URL}/create-listing`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, id_clerk: user?.id }), // Incluir id_clerk en los datos enviados
+        body: JSON.stringify({ ...formData, id_clerk: user?.id, nombre_usuario: user?.fullName || user?.firstName || 'Usuario desconocido' }), // Incluir id_clerk en los datos enviados
       });
       if (response.ok) {
         setAlertMessage('Listado creado correctamente');
@@ -62,7 +62,7 @@ export default function Resumen() {
         <Text style={styles.stepTitle}>Paso 1.2 - Dirección Confirmada</Text>
         <Text style={styles.stepDescription}>
           {formData.paso1_2
-            ? `📌 País: ${formData.paso1_2.pais}\n🏠 Dirección: ${formData.paso1_2.address}\n🚪 Puerta: ${formData.paso1_2.door}\n📬 Código Postal: ${formData.paso1_2.postalCode}\n🏙️ Ciudad: ${formData.paso1_2.city}\n🗺️ Provincia: ${formData.paso1_2.provincia}\n Distrito: ${formData.paso1_2.district}`
+            ? ` País: ${formData.paso1_2.pais}\n Dirección: ${formData.paso1_2.address}\n Puerta: ${formData.paso1_2.door}\n Código Postal: ${formData.paso1_2.postalCode}\n Ciudad: ${formData.paso1_2.city}\n Provincia: ${formData.paso1_2.provincia}\n Distrito: ${formData.paso1_2.district}`
             : 'No hay dirección confirmada.'}
         </Text>
       </View>
@@ -154,6 +154,7 @@ export default function Resumen() {
         <Text style={styles.stepTitle}>Información del usuario</Text>
         <Text style={styles.stepDescription}>
           {user ? `🆔 ID Clerk: ${user.id}` : 'No se ha identificado al usuario.'}
+          {user ? `👤 Nombre: ${user.fullName || user.firstName}` : 'No se ha identificado al usuario.'}
         </Text>
       </View>
 

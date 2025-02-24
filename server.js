@@ -315,10 +315,10 @@ app.post('/ordenes', async (req, res) => {
 
 app.post('/create-listing', async (req, res) => {
   // Extraemos los datos enviados desde el cliente
-  const { id_clerk, paso1_1, paso1_2, paso1_3, paso1_4, paso1_5, paso1_6, paso1_7 } = req.body;
+  const { id_clerk, nombre_usuario, paso1_1, paso1_2, paso1_3, paso1_4, paso1_5, paso1_6, paso1_7 } = req.body;
 
   try {
-    console.log("ID Clerk recibido:", id_clerk); // Para depuración
+    console.log("ID Clerk recibido:", id_clerk, nombre_usuario); // Para depuración
 
     // Definición de miniatura y fotos a partir de paso1_7
     const miniatura = (paso1_7 && paso1_7.photos && paso1_7.photos.length > 0) ? paso1_7.photos[0] : null;
@@ -446,7 +446,7 @@ app.post('/create-listing', async (req, res) => {
     const propietarioValues = [
       paso1_6?.propietarioFoto || null,
       id_clerk || 'Desconocido',
-      'Desconocido',
+      nombre_usuario ||'Desconocido',
       new Date(), // Fecha actual
       0
     ];
