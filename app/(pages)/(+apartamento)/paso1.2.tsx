@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, Switch, TouchableOpacity, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Stack } from 'expo-router';
-import * as Location from 'expo-location'; // Importar la librería de geolocalización
+import { StyleSheet, Text, View, TextInput, Switch, TouchableOpacity, ScrollView, FlatList, TouchableWithoutFeedback } from 'react-native';
+import { useRouter, Stack } from 'expo-router';
+import * as Location from 'expo-location';
 import { useForm } from '@/context/FormContext';
 
 export default function Paso1_2() {
@@ -20,6 +19,10 @@ export default function Paso1_2() {
     district: '',
   });
   const [isFormValid, setIsFormValid] = useState(false);
+  
+  // Estado para la búsqueda y sugerencias
+  const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<any[]>([]);
 
   useEffect(() => {
     // Solicitar permisos y obtener la ubicación cuando el componente se monta
@@ -27,7 +30,7 @@ export default function Paso1_2() {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status === 'granted') {
         const loc = await Location.getCurrentPositionAsync({});
-        setLocation(loc.coords); // Guardar la ubicación en el estado
+        setLocation(loc.coords);
       }
     };
     getLocation();
@@ -37,7 +40,7 @@ export default function Paso1_2() {
     // Si hay datos previos en el contexto, se llenan automáticamente en el formulario
     setForm(prev => ({
       ...prev,
-      ...formData.paso1_2, // Carga los datos almacenados en el contexto
+      ...formData.paso1_2,
     }));
   }, [formData]);
 
@@ -53,20 +56,55 @@ export default function Paso1_2() {
     );
   }, [form]);
 
+  // Función para manejar los cambios en los inputs
   const handleInputChange = (name: string, value: string) => {
     setForm(prev => ({ ...prev, [name]: value }));
+    if(name === 'address'){
+      setQuery(value);
+    }
   };
 
+  // Función para manejar la selección de una sugerencia
+  const handleSuggestionSelect = (suggestion: any) => {
+    const addr = suggestion.address;
+    setForm({
+      address: addr.road || suggestion.display_name, // Si no hay 'road', se usa el display_name
+      door: addr.house_number || '',
+      postalCode: addr.postcode || '',
+      city: addr.city || addr.town || addr.village || '',
+      provincia: addr.state || '',
+      pais: addr.country || '',
+      district: addr.county || addr.suburb || '',
+    });
+    setQuery(''); // Limpiar el query
+    setSuggestions([]); // Limpiar sugerencias
+  };
+
+  // Efecto para buscar sugerencias (debounce de 500ms)
+  useEffect(() => {
+    const fetchSuggestions = async () => {
+      if (query.trim().length < 3) {
+        setSuggestions([]);
+        return;
+      }
+      try {
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&addressdetails=1&q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+        setSuggestions(data);
+      } catch (error) {
+        console.error('Error al obtener sugerencias:', error);
+      }
+    };
+    const timeoutId = setTimeout(fetchSuggestions, 500);
+    return () => clearTimeout(timeoutId);
+  }, [query]);
+
   const handleSubmit = () => {
-    // Guarda los datos en el contexto antes de redirigir
     updateFormData('paso1_2', {
       ...form,
       location, // Guarda la ubicación en el contexto
     });
-
     console.log('Formulario enviado:', { ...form, location });
-
-    // Redirige a la siguiente página
     router.push('/paso1.3');
   };
 
@@ -76,7 +114,7 @@ export default function Paso1_2() {
         title: 'Paso 1.2',
         headerTitleStyle: styles.headerTitle,
       }} />
-
+      {/* Título y subtítulo */}
       <Text style={styles.title}>Confirma tu dirección</Text>
       <Text style={styles.subtitle}>Solo compartiremos la dirección con los huéspedes después de que hayan hecho la reserva.</Text>
       
@@ -91,10 +129,24 @@ export default function Paso1_2() {
       <Text style={styles.label}>Dirección postal</Text>
       <TextInput
         style={styles.input}
-        placeholder="Avinguda d'Isabel la Catòlica, 38"
+        placeholder="Ejemplo: Avinguda d'Isabel la Catòlica, 38"
         value={form.address}
         onChangeText={value => handleInputChange('address', value)}
       />
+      {/* Mostrar sugerencias debajo del input */}
+      {suggestions.length > 0 && (
+        <FlatList
+          data={suggestions}
+          keyExtractor={(item) => item.place_id.toString()}
+          renderItem={({ item }) => (
+            <TouchableWithoutFeedback onPress={() => handleSuggestionSelect(item)}>
+              <View style={styles.suggestionItem}>
+                <Text>{item.display_name}</Text>
+              </View>
+            </TouchableWithoutFeedback>
+          )}
+        />
+      )}
 
       <Text style={styles.label}>Puerta, piso, escalera (si procede)</Text>
       <TextInput
@@ -148,7 +200,7 @@ export default function Paso1_2() {
         disabled={!isFormValid}
         onPress={handleSubmit}
       >
-          <Text style={styles.nextButtonText}>Siguiente</Text>
+        <Text style={styles.nextButtonText}>Siguiente</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.back()} style={styles.backContainer}>
@@ -230,5 +282,11 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 20,
+  },
+  suggestionItem: {
+    padding: 10,
+    backgroundColor: '#eee',
+    borderBottomWidth: 1,
+    borderColor: '#ccc',
   },
 });

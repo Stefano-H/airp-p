@@ -21,7 +21,7 @@ export default function Resumen() {
       const response = await fetch(`${API_BASE_URL}/create-listing`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, id_clerk: user?.id, nombre_usuario: user?.fullName || user?.firstName || 'Usuario desconocido' }), // Incluir id_clerk en los datos enviados
+        body: JSON.stringify({ ...formData, id_clerk: user?.id, nombre_usuario: user?.fullName || user?.firstName || 'Usuario desconocido', imagen_url: user?.imageUrl || null }), // Incluir id_clerk en los datos enviados
       });
       if (response.ok) {
         setAlertMessage('Listado creado correctamente');
@@ -155,6 +155,7 @@ export default function Resumen() {
         <Text style={styles.stepDescription}>
           {user ? `🆔 ID Clerk: ${user.id}` : 'No se ha identificado al usuario.'}
           {user ? `👤 Nombre: ${user.fullName || user.firstName}` : 'No se ha identificado al usuario.'}
+          {user ? `📷 Imagen: ${user.imageUrl}` : 'No se ha identificado al usuario.'}
         </Text>
       </View>
 
