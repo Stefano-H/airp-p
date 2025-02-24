@@ -135,7 +135,29 @@ CREATE TABLE IF NOT EXISTS `airbnb`.`ordenes` (
 DEFAULT CHARACTER SET = utf8mb4
 ROW_FORMAT = DYNAMIC;
 
-SELECT * FROM listings WHERE id = 2;
+
+CREATE TABLE IF NOT EXISTS `airbnb`.`usuarios` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `clerk_id` VARCHAR(255) NOT NULL, -- ID de Clerk
+  `nombre` VARCHAR(255) DEFAULT NULL,
+  `email` VARCHAR(255) DEFAULT NULL,
+  `rol` ENUM('propietario', 'huésped', 'admin') DEFAULT 'huésped',
+  `foto_url` VARCHAR(255) DEFAULT NULL,
+  `fecha_registro` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_clerk_id` (`clerk_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+ALTER TABLE `airbnb`.`listings`
+ADD COLUMN `propietario_id` INT,
+ADD CONSTRAINT `fk_listings_usuarios`
+  FOREIGN KEY (`propietario_id`)
+  REFERENCES `airbnb`.`usuarios` (`id`);
+
+
+
 
 
 /* Inserts ejemplo */

@@ -31,6 +31,47 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
+app.post('/webhooks/clerk', async (req, res) => {
+  const event = req.body;
+
+  // Verificar que los datos se estén extrayendo correctamente
+  console.log('Evento recibido:', event);
+
+  if (event.type === 'user.created') {
+    const { id, first_name, last_name, email_addresses, image_url } = event.data;
+
+    // Extracción de email
+    const email = email_addresses && email_addresses.length > 0 ? email_addresses[0].email_address : null;
+    // Formar el nombre completo
+    const nombre = `${first_name || ''} ${last_name || ''}`.trim();
+    
+    console.log('ID:', id);
+    console.log('Nombre:', nombre);
+    console.log('Email:', email);
+    console.log('Foto URL:', image_url);
+
+    try {
+      // Verifica si el usuario ya existe en la base de datos
+      const [exists] = await pool.query('SELECT id FROM usuarios WHERE clerk_id = ?', [id]);
+      if (!exists.length) {
+        // Inserta el usuario en la base de datos
+        await pool.query(
+          'INSERT INTO usuarios (clerk_id, nombre, email, foto_url, rol) VALUES (?, ?, ?, ?, ?)',
+          [id, nombre, email, image_url, 'huésped']
+        );
+        console.log(`Usuario ${id} insertado correctamente`);
+      } else {
+        console.log(`El usuario ${id} ya existe`);
+      }
+    } catch (error) {
+      console.error('Error al procesar el webhook:', error);
+      return res.sendStatus(500);
+    }
+  }
+
+  res.sendStatus(200);
+});
+
 // Endpoint: Obtener listados con filtro por categoría
 app.get('/listings', async (req, res) => {
   const { category } = req.query;
