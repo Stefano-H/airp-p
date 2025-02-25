@@ -138,10 +138,10 @@ ROW_FORMAT = DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS `airbnb`.`usuarios` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `clerk_id` VARCHAR(255) NOT NULL, -- ID de Clerk
+  `clerk_id` VARCHAR(255) NOT NULL, 
   `nombre` VARCHAR(255) DEFAULT NULL,
   `email` VARCHAR(255) DEFAULT NULL,
-  `rol` ENUM('propietario', 'huésped', 'admin') DEFAULT 'huésped',
+  `rol` ENUM('propietario', 'usuario', 'admin') DEFAULT 'usuario',
   `foto_url` VARCHAR(255) DEFAULT NULL,
   `fecha_registro` DATETIME DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

@@ -17,15 +17,17 @@ import {
   import { Link } from 'expo-router';
   import * as ImagePicker from 'expo-image-picker';
   import GlobalStyles from '../../Android-styles/GlobalStyles';
+  import API_BASE_URL from '@/utils/apiConfig';
+  import { useFocusEffect } from '@react-navigation/core'; // Importa useFocusEffect
   
   const Page = () => {
     const { signOut, isSignedIn } = useAuth();
     const { user } = useUser();
+    const [role, setRole] = useState('');
     const [firstName, setFirstName] = useState(user?.firstName || '');
     const [lastName, setLastName] = useState(user?.lastName || '');
     const [email, setEmail] = useState(user?.emailAddresses[0]?.emailAddress || '');
     const [phone, setPhone] = useState(user?.primaryPhoneNumber || '');
-    const [location, setLocation] = useState(user?.publicMetadata?.location || '');
     const [bio, setBio] = useState(user?.publicMetadata?.bio || '');
     const [edit, setEdit] = useState(false);
     const [isHost, setIsHost] = useState(user?.publicMetadata?.isHost || false);
@@ -36,18 +38,55 @@ import {
         setLastName(user.lastName || '');
         setEmail(user.emailAddresses[0]?.emailAddress || '');
         setPhone(user.primaryPhoneNumber || '');
-        setLocation(user.publicMetadata?.location || '');
         setBio(user.publicMetadata?.bio || '');
         setIsHost(user.publicMetadata?.isHost || false);
       }
     }, [user]);
+
+  // Aquí usamos useFocusEffect para actualizar el rol del usuario cuando se regresa a la pantalla
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchUserRole = async () => {
+        if (user) {
+          try {
+            console.log('Obteniendo rol del usuario...');
+
+            if (!user.id) {
+              console.error('Error: user.id es undefined o null');
+              return;
+            }
+
+            console.log('Enviando request a:', `${API_BASE_URL}/api/getUserRole`);
+            console.log('Con el body:', JSON.stringify({ clerkId: user.id }));
+
+            const response = await fetch(`${API_BASE_URL}/api/getUserRole`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ clerkId: user.id }),
+            });
+
+            console.log('Response recibido:', response);
+
+            const data = await response.json();
+            console.log('Data recibida:', data);
+
+            setRole(data.role);
+            console.log('Rol del usuario:', data.role);
+          } catch (error) {
+            console.error("Error al obtener el rol del usuario:", error);
+          }
+        }
+      };
+
+      fetchUserRole();
+    }, [user])
+  );
   
     const onSaveUser = async () => {
       try {
         await user?.update({
           firstName,
           lastName,
-          publicMetadata: { location, bio, isHost },
         });
       } catch (error) {
         console.log(error);
@@ -69,6 +108,8 @@ import {
         user?.setProfileImage({ file: base64 });
       }
     };
+
+    console.log('Rol:', role);
   
     return (
       <SafeAreaView style={GlobalStyles.droidSafeArea}>
@@ -93,11 +134,10 @@ import {
               {/* <TextInput placeholder="Ubicación" value={location} onChangeText={setLocation} editable={edit} style={defaultStyles.inputField} />
               <TextInput placeholder="Teléfono" value={phone} onChangeText={setPhone} editable={edit} style={defaultStyles.inputField} />
               <TextInput placeholder="Descripción" value={bio} onChangeText={setBio} editable={edit} multiline style={[defaultStyles.inputField, { height: 80 }]} /> */}
-              {isHost && (
-                <Link href={'/admin/properties'} asChild>
-                  <Button title="Administrar Propiedades" color={Colors.dark} />
-                </Link>
+              {role === 'propietario' && (
+                <Button title="Administrar Propiedades" color={Colors.dark} />
               )}
+
             </View>
           ) : (
             <View style={styles.noUserContainer}>
@@ -114,6 +154,7 @@ import {
           <View style={styles.logbutton}>
             {isSignedIn && <Button title="Cerrar sesión" onPress={() => signOut()} color={Colors.dark} />}
           </View>
+          
         </ScrollView>
       </SafeAreaView>
     );

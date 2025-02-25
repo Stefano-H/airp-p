@@ -31,6 +31,43 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
+// 🔹 Endpoint para obtener el rol del usuario
+app.post('/api/getUserRole', async (req, res) => {
+  const { clerkId } = req.body;
+
+  console.log("🟢 Petición recibida en /api/getUserRole");
+  console.log("📥 Body recibido:", req.body);
+
+  if (!clerkId) {
+    return res.status(400).json({ error: "Falta el parámetro clerkId" });
+  }
+
+  try {
+    const connection = await pool.getConnection(); // 📌 Usar `await` para obtener la conexión
+    console.log("🔄 Conexión a la base de datos establecida.");
+
+    const query = "SELECT rol FROM usuarios WHERE clerk_id = ?";
+    const [results] = await connection.execute(query, [clerkId]); // 📌 `execute` en lugar de `query`
+    
+    connection.release(); // 🔹 Liberar la conexión
+
+    console.log('🔎 Resultados de la consulta:', results);
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    return res.json({ role: results[0].rol });
+  } catch (err) {
+    console.error('❌ Error en la consulta SQL:', err);
+    return res.status(500).json({ error: 'Error en la base de datos' });
+  }
+});
+
+
+
+
+
 app.post('/webhooks/clerk', async (req, res) => {
   const event = req.body;
 
@@ -57,7 +94,7 @@ app.post('/webhooks/clerk', async (req, res) => {
         // Inserta el usuario en la base de datos
         await pool.query(
           'INSERT INTO usuarios (clerk_id, nombre, email, foto_url, rol) VALUES (?, ?, ?, ?, ?)',
-          [id, nombre, email, image_url, 'huésped']
+          [id, nombre, email, image_url, 'usuario']
         );
         console.log(`Usuario ${id} insertado correctamente`);
       } else {
