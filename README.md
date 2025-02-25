@@ -12,7 +12,10 @@ A los dueños de los locales les permitirá ofrecer a más personas sus servicio
 ## Nuestros Objetivos
 Ser la manera más fácil de reservar y alquilar locales para eventos en Latinoamerica.
 ## Tecnologias Usadas
-
+- React
+- js
+- typescript
+- sql
 ## Diagramas
 ### Diagrama de Clases
 ![Descripción de la imagen](Media/DiagramaDeClases.png)
