@@ -197,8 +197,85 @@ app.get('/listings', async (req, res) => {
 //   });
 
 
+app.get('/prop-listings', async (req, res) => {
+  const { category, propietario_id } = req.query;
+
+  // Base de la consulta
+  let query = `
+    SELECT 
+      l.*, 
+      d.*, 
+      c.*,
+      r.*,
+      s.*,
+      p.*
+    FROM 
+      listings l
+    LEFT JOIN 
+      direccion d ON l.id = d.id
+    LEFT JOIN 
+      categorias c ON l.id = c.id
+    LEFT JOIN
+      reglas r ON l.id = r.id
+    LEFT JOIN
+      servicios s ON l.id = s.id
+    LEFT JOIN
+      propietario p ON l.propietario_id = p.id  -- Aseguramos que l.propietario_id se conecta con p.id
+  `;
+
+  console.log('query:', query);
+
+  const values = [];
+
+  console.log('category:', category);
+  console.log('propietario_id:', propietario_id);
+
+  // Verifica si la variable 'category' está definida y no es igual a 'Todas'
+  if (category && category !== 'Todas') {
+    let dbField;
+    console.log('Entré dentro del if');
+
+    // Dependiendo del valor de 'category', asigna un campo específico de la tabla 'categorias' a 'dbField'
+    switch (category) {
+      case 'Eventos corporativos':
+        dbField = 'c.EventosCorporativos'; // Si 'category' es 'Eventos corporativos', asigna 'c.EventosCorporativos' a 'dbField'
+        break;
+      case 'Frente a la playa':
+        dbField = 'c.Frente_a_la_playa'; // Si 'category' es 'Frente a la playa', asigna 'c.Frente_a_la_playa' a 'dbField'
+        break;
+      default:
+        dbField = `c.${category}`; // Para cualquier otro valor de 'category', asigna 'c.' seguido del valor de 'category' a 'dbField'
+    }
+
+    // Imprime el valor de 'dbField' en la consola para depuración
+    console.log('dbField:', dbField);
+
+    // Agrega una cláusula WHERE a la consulta SQL para filtrar los resultados donde el campo 'dbField' sea igual a 1
+    query += ` WHERE ${dbField} = 1`;
+  }
+
+  // Verifica si 'propietario_id' fue proporcionado
+  if (propietario_id) {
+    // Si 'propietario_id' está definido, agrega un filtro adicional a la consulta para coincidir con 'propietario_id'
+    const whereClause = query.includes('WHERE') ? 'AND' : 'WHERE';
+    query += ` ${whereClause} l.propietario_id = ?`;
+    values.push(propietario_id); // Se agrega el valor de 'propietario_id' a los valores de la consulta
+  }
+
+  try {
+    const [results] = await pool.query(query, values);
+    console.log(`Number of listings found: ${results.length}`);
+    res.json(results);
+  } catch (error) {
+    console.error('Error fetching all listings:', error);
+    res.status(500).send('Server Error');
+  }
+});
+
+
+
   app.get('/all-listings', async (req, res) => {
-    const { category } = req.query;
+    const { category, propietario_id } = req.query;
   
     // Base de la consulta
     let query = `
@@ -220,20 +297,21 @@ app.get('/listings', async (req, res) => {
       LEFT JOIN
         servicios s ON l.id = s.id
       LEFT JOIN
-        propietario p ON l.id = p.id
+        propietario p ON l.propietario_id = p.id  -- Aseguramos que l.propietario_id se conecta con p.id
     `;
-
+  
     console.log('query:', query);
   
     const values = [];
-
+  
     console.log('category:', category);
+    console.log('propietario_id:', propietario_id);
   
     // Verifica si la variable 'category' está definida y no es igual a 'Todas'
     if (category && category !== 'Todas') {
       let dbField;
-      console.log('entre dentro del if');
-
+      console.log('Entré dentro del if');
+  
       // Dependiendo del valor de 'category', asigna un campo específico de la tabla 'categorias' a 'dbField'
       switch (category) {
         case 'Eventos corporativos':
@@ -245,16 +323,21 @@ app.get('/listings', async (req, res) => {
         default:
           dbField = `c.${category}`; // Para cualquier otro valor de 'category', asigna 'c.' seguido del valor de 'category' a 'dbField'
       }
-
+  
       // Imprime el valor de 'dbField' en la consola para depuración
       console.log('dbField:', dbField);
-
+  
       // Agrega una cláusula WHERE a la consulta SQL para filtrar los resultados donde el campo 'dbField' sea igual a 1
       query += ` WHERE ${dbField} = 1`;
     }
-
-
-
+  
+    // Verifica si 'propietario_id' fue proporcionado
+    if (propietario_id) {
+      // Si 'propietario_id' está definido, agrega un filtro adicional a la consulta para coincidir con 'propietario_id'
+      const whereClause = query.includes('WHERE') ? 'AND' : 'WHERE';
+      query += ` ${whereClause} l.propietario_id = ?`;
+      values.push(propietario_id); // Se agrega el valor de 'propietario_id' a los valores de la consulta
+    }
   
     try {
       const [results] = await pool.query(query, values);
@@ -265,7 +348,7 @@ app.get('/listings', async (req, res) => {
       res.status(500).send('Server Error');
     }
   });
-
+  
 
 
 // Endpoint: Obtener listados por propietario
@@ -409,8 +492,8 @@ app.post('/create-listing', async (req, res) => {
       INSERT INTO listings 
       (estado, nombre, descripción, precio, miniatura, foto1, foto2, foto3, 
        proceso_de_llegada, invitados_incluidos, cancelación, habitaciones, tipo_de_habitación, 
-       camas, baños, cochera, parking, piscina, gimnasio, review_scores_rating, number_of_reviews)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+       camas, baños, cochera, parking, piscina, gimnasio, review_scores_rating, number_of_reviews, propietario_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const listingsValues = [
       paso1_2?.pais || null,              // Se usa el país como "estado"
@@ -433,7 +516,8 @@ app.post('/create-listing', async (req, res) => {
       paso1_3?.piscina ||  null,           // piscina
       paso1_3?.gimnasio ||  null,           // gimnasio
       null,                                // review_scores_rating
-      null                                 // number_of_reviews
+      null,                                 // number_of_reviews
+      id_clerk || 'Desconocido',
     ];
     await pool.query(queryListing, listingsValues);
 

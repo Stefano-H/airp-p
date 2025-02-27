@@ -6,6 +6,9 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
+    "extra": {
+      "clerkPublishableKey": "pk_test_aW1tdW5lLW1vb3NlLTUyLmNsZXJrLmFjY291bnRzLmRldiQ"
+    },
     "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/images/inca3.1.1.png",

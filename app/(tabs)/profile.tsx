@@ -19,6 +19,7 @@ import {
   import GlobalStyles from '../../Android-styles/GlobalStyles';
   import API_BASE_URL from '@/utils/apiConfig';
   import { useFocusEffect } from '@react-navigation/core'; // Importa useFocusEffect
+  import { useRouter } from 'expo-router';
   
   const Page = () => {
     const { signOut, isSignedIn } = useAuth();
@@ -31,6 +32,7 @@ import {
     const [bio, setBio] = useState(user?.publicMetadata?.bio || '');
     const [edit, setEdit] = useState(false);
     const [isHost, setIsHost] = useState(user?.publicMetadata?.isHost || false);
+    const router = useRouter();
   
     useEffect(() => {
       if (user) {
@@ -134,9 +136,6 @@ import {
               {/* <TextInput placeholder="Ubicación" value={location} onChangeText={setLocation} editable={edit} style={defaultStyles.inputField} />
               <TextInput placeholder="Teléfono" value={phone} onChangeText={setPhone} editable={edit} style={defaultStyles.inputField} />
               <TextInput placeholder="Descripción" value={bio} onChangeText={setBio} editable={edit} multiline style={[defaultStyles.inputField, { height: 80 }]} /> */}
-              {role === 'propietario' && (
-                <Button title="Administrar Propiedades" color={Colors.dark} />
-              )}
 
             </View>
           ) : (
@@ -150,11 +149,17 @@ import {
               </Link>
             </View>
           )}
-  
+          
+          {isSignedIn && role === 'propietario' && (
+            <TouchableOpacity style={styles.button} onPress={() => router.push('/(pages)/administrar-propiedades')}>
+              <Text style={styles.buttonText}>Administrar Propiedades</Text>
+            </TouchableOpacity>
+          )}
+
           <View style={styles.logbutton}>
             {isSignedIn && <Button title="Cerrar sesión" onPress={() => signOut()} color={Colors.dark} />}
           </View>
-          
+
         </ScrollView>
       </SafeAreaView>
     );
@@ -217,6 +222,19 @@ import {
     },
     logbutton: {
       padding: 24,
+    },
+    button: {
+      marginTop: 20,
+      backgroundColor: '#ff385c',
+      paddingVertical: 10,
+      borderRadius: 10,
+      alignItems: 'center',
+      marginHorizontal: 25,
+    },
+    buttonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: 'bold',
     },
   });
   

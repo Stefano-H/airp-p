@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS `airbnb`.`listings` (
   `gimnasio` TINYINT(1) DEFAULT '0',
   `review_scores_rating` INT DEFAULT NULL,
   `number_of_reviews` INT DEFAULT NULL,
+  `propietario_id` VARCHAR(255) NOT NULL, 
   PRIMARY KEY (`id`)
 ) ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
@@ -149,12 +150,6 @@ CREATE TABLE IF NOT EXISTS `airbnb`.`usuarios` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-
-ALTER TABLE `airbnb`.`listings`
-ADD COLUMN `propietario_id` INT,
-ADD CONSTRAINT `fk_listings_usuarios`
-  FOREIGN KEY (`propietario_id`)
-  REFERENCES `airbnb`.`usuarios` (`id`);
 
 
 
