@@ -167,6 +167,7 @@ INSERT INTO `airbnb`.`propietario` (`id`, `foto_url`, `id_usuario`, `nombre_prop
 
 
 /*Apartamento 2 */
+
 INSERT INTO `airbnb`.`listings` (`id`, `estado`, `nombre`, `descripción`, `precio`, `miniatura`, `foto1`, `proceso_de_llegada`, `invitados_incluidos`, `cancelación`, `habitaciones`, `tipo_de_habitación`, `camas`, `baños`, `cochera`, `parking`, `piscina`, `gimnasio`, `review_scores_rating`, `number_of_reviews`) VALUES ('2', 'España', 'Apartemento en la playa', 'Bienvenidos a nuestro luminoso y cómodo apartamento, ideal para una estancia tranquila y agradable. Ubicado en el centro de la ciudad, estarás a solo unos minutos de las principales atracciones turísticas, restaurantes, tiendas y transporte público, lo que hace de este espacio el lugar perfecto para explorar todo lo que la ciudad tiene para ofrecer.', '50', 'https://a0.muscache.com/im/pictures/miso/Hosting-702213972376625116/original/a8abb8b3-0846-4c21-9672-dbc76bbbeec7.jpeg', 'https://a0.muscache.com/im/pictures/miso/Hosting-702213972376625116/original/a8abb8b3-0846-4c21-9672-dbc76bbbeec7.jpeg', '1', '40', '1', '4', 'Duplex', '3', '2', '1', '1', '1', '1', '85', '90');
 
 INSERT INTO `airbnb`.`categorias` (`id`, `Todas`, `Bodas`, `Fiestas`, `Frente_a_la_playa`, `Campo`, `EventosCorporativos`) VALUES ('2', '1', '1', '1', '1', '1', '1');
