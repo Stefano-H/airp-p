@@ -19,6 +19,7 @@ const Page = () => {
     const { user } = useUser();
 
     console.log('user:', user.id);
+    
 
     useEffect(() => {
         const fetchData = async () => {
