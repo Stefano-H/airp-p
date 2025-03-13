@@ -31,6 +31,58 @@ const pool = mysql.createPool({
   queueLimit: 0,
 });
 
+
+app.post('/api/update-listing', async (req, res) => {
+  const { 
+    id, 
+    nombre, 
+    descripcion, 
+    precio, 
+    tipo_de_habitacion, 
+    habitaciones, 
+    camas, 
+    banos,
+    miniatura,
+    foto1,
+    foto2,
+    foto3 
+  } = req.body;
+
+  if (!id) {
+    return res.status(400).json({ error: 'Falta el identificador del listado' });
+  }
+
+  try {
+    const query = `
+      UPDATE listings 
+      SET nombre = ?, descripción = ?, precio = ?, \`tipo_de_habitación\` = ?, 
+          habitaciones = ?, camas = ?, baños = ?,
+          miniatura = ?, foto1 = ?, foto2 = ?, foto3 = ?
+      WHERE id = ?
+    `;
+    const values = [
+      nombre,
+      descripcion,
+      precio,
+      tipo_de_habitacion,
+      habitaciones,
+      camas,
+      banos,
+      miniatura,
+      foto1,
+      foto2,
+      foto3,
+      id
+    ];
+    await pool.query(query, values);
+    res.json({ message: 'Datos del apartamento actualizados correctamente' });
+  } catch (error) {
+    console.error('Error al actualizar el listado:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+});
+
+
 // 🔹 Endpoint para obtener listados por clerkId del propietario
 app.get('/api/listings-by-owner', async (req, res) => {
   const { clerkId } = req.query;
