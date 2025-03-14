@@ -150,14 +150,14 @@ export default function Resumen() {
       </View>
 
        {/* ID Clerk del usuario */}
-       <View style={styles.stepContainer}>
+       {/* <View style={styles.stepContainer}>
         <Text style={styles.stepTitle}>Información del usuario</Text>
         <Text style={styles.stepDescription}>
           {user ? `🆔 ID Clerk: ${user.id}` : 'No se ha identificado al usuario.'}
           {user ? `👤 Nombre: ${user.fullName || user.firstName}` : 'No se ha identificado al usuario.'}
           {user ? `📷 Imagen: ${user.imageUrl}` : 'No se ha identificado al usuario.'}
         </Text>
-      </View>
+      </View> */}
 
       {/* Botón para enviar la información y crear el listado */}
       <TouchableOpacity

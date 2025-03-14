@@ -149,6 +149,36 @@ useFocusEffect(
             </Link>
           </View>
         )}
+
+        {isSignedIn && (
+          <View style={styles.settingsContainer}>
+            <Text style={styles.sectionHeader}>Configuración</Text>
+            
+            <TouchableOpacity 
+              style={styles.settingItem}
+              onPress={() => router.push('/(settings)/personal-info')}
+            >
+              <Text style={styles.settingText}>Información personal</Text>
+              <Ionicons name="chevron-forward" size={20} color={Colors.dark} />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.settingItem}
+              onPress={() => router.push('/(settings)/security')}
+            >
+              <Text style={styles.settingText}>Inicio de sesión y seguridad</Text>
+              <Ionicons name="chevron-forward" size={20} color={Colors.dark} />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.settingItem}
+              onPress={() => router.push('/(settings)/payments')}
+            >
+              <Text style={styles.settingText}>Pagos y cobros</Text>
+              <Ionicons name="chevron-forward" size={20} color={Colors.dark} />
+            </TouchableOpacity>
+          </View>
+        )}
         
         {isSignedIn && role === 'propietario' && (
           <TouchableOpacity style={styles.button} onPress={() => router.push('/(pages)/administrar-propiedades')}>
@@ -235,6 +265,33 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  settingsContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    marginHorizontal: 24,
+    marginBottom: 24,
+    paddingVertical: 8,
+  },
+  sectionHeader: {
+    fontFamily: 'mon-b',
+    fontSize: 18,
+    padding: 16,
+    color: Colors.dark,
+  },
+  settingItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+  },
+  settingText: {
+    fontFamily: 'mon',
+    fontSize: 16,
+    color: Colors.dark,
   },
 });
 
