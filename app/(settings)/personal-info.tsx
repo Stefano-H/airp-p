@@ -47,7 +47,7 @@ const PersonalInfo = () => {
 
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Nombre completo</Text>
-          <View style={defaultStyles.inputField}>
+          <View style={styles.inputContainer}>
             <TextInput
               value={fullName}
               onChangeText={setFullName}
@@ -137,13 +137,17 @@ const styles = StyleSheet.create({
     color: Colors.grey,
     fontSize: 14,
   },
+  inputContainer: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: Colors.grey,
+    borderRadius: 8,
+    padding: 10,
+  },
   input: {
     fontFamily: 'mon',
     fontSize: 16,
     color: Colors.dark,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.grey,
-    paddingVertical: 8,
   },
 });
 
