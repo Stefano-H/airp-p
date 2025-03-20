@@ -1,4 +1,4 @@
-# Proyecto AirP&P
+# Proyecto AlquilaTuEvento
 ## Explicacion idea del proyecto
 La app propuesta es la creación de una app que conecte a los usuarios con todos los
 locales de eventos (casas, salas de recepciones, bares, auditorios para eventos corporativos, campos

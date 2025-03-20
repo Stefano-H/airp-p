@@ -177,6 +177,33 @@ useFocusEffect(
               <Text style={styles.settingText}>Pagos y cobros</Text>
               <Ionicons name="chevron-forward" size={20} color={Colors.dark} />
             </TouchableOpacity>
+
+            <Text style={styles.sectionHeader}>Asistencia</Text>
+
+            <TouchableOpacity 
+              style={styles.settingItem}
+              onPress={() => router.push('/(settings)/help')}
+            >
+              <Text style={styles.settingText}>Centro de ayuda</Text>
+              <Ionicons name="chevron-forward" size={20} color={Colors.dark} />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.settingItem}
+              onPress={() => router.push('/(settings)/terminos-condiciones')}
+            >
+              <Text style={styles.settingText}>Términos y condiciones</Text>
+              <Ionicons name="chevron-forward" size={20} color={Colors.dark} />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.settingItem}
+              onPress={() => router.push('/(settings)/politica-privacidad')}
+            >
+              <Text style={styles.settingText}>Política de privacidad</Text>
+              <Ionicons name="chevron-forward" size={20} color={Colors.dark} />
+            </TouchableOpacity>
+
           </View>
         )}
         

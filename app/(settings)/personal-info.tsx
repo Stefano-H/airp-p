@@ -70,7 +70,7 @@ const PersonalInfo = () => {
             style={styles.input}
           />
           <Text style={styles.hintText}>
-            Añade un número para que los viajeros con reservas confirmadas y Airbnb puedan ponerse en contacto contigo.
+            Añade un número para que los viajeros con reservas confirmadas y AlquilaTuEvento puedan ponerse en contacto contigo.
           </Text>
         </View>
 

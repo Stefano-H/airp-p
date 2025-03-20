@@ -25,7 +25,7 @@ const connection = mysql.createConnection({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'airbnb',
+  database: 'AlquilaTuEvento',
   port: 3307 // Cambia el puerto aquí
 });
 

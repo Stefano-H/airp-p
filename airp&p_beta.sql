@@ -34,12 +34,12 @@ ROW_FORMAT = DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS `airbnb`.`direccion` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `distrito` TEXT DEFAULT NULL,
-  `ciudad` TEXT DEFAULT NULL,
-  `país` TEXT DEFAULT NULL,
-  `dirección` TEXT DEFAULT NULL,
-  `puerta` TEXT DEFAULT NULL,
-  `codigo_postal` TEXT DEFAULT NULL,
+  `distrito` VARCHAR(100) DEFAULT NULL,
+  `ciudad` VARCHAR(50) DEFAULT NULL,
+  `país` VARCHAR(50) DEFAULT NULL,
+  `dirección` VARCHAR(50) DEFAULT NULL,
+  `puerta` INT(5) DEFAULT NULL,
+  `codigo_postal` INT(6) DEFAULT NULL,
   PRIMARY KEY (`id`),
   CONSTRAINT `direccion_ibfk_1`
     FOREIGN KEY (`id`)
@@ -107,7 +107,7 @@ CREATE TABLE IF NOT EXISTS `airbnb`.`propietario` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `foto_url` VARCHAR(255) DEFAULT NULL,
   `id_usuario` VARCHAR(255) DEFAULT NULL,
-  `nombre_propietario` VARCHAR(255) DEFAULT NULL,
+  `nombre_propietario` VARCHAR(50) DEFAULT NULL,
   `fecha_de_creación_de_cuenta` DATE DEFAULT NULL,
   `verificado` TINYINT(1) DEFAULT '0',
   PRIMARY KEY (`id`),
@@ -122,7 +122,7 @@ CREATE TABLE IF NOT EXISTS `airbnb`.`ordenes` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `id_clerk_cliente` VARCHAR(255) NOT NULL,
   `id_apartamento` INT NOT NULL,
-  `nombre_apellido` VARCHAR(255) NOT NULL,
+  `nombre_apellido` VARCHAR(50) NOT NULL,
   `fecha_check_in` DATETIME NOT NULL,
   `fecha_check_out` DATETIME NOT NULL,
   `telefono` VARCHAR(20) NOT NULL,
@@ -140,8 +140,8 @@ ROW_FORMAT = DYNAMIC;
 CREATE TABLE IF NOT EXISTS `airbnb`.`usuarios` (
   `id` INT NOT NULL AUTO_INCREMENT,
   `clerk_id` VARCHAR(255) NOT NULL, 
-  `nombre` VARCHAR(255) DEFAULT NULL,
-  `email` VARCHAR(255) DEFAULT NULL,
+  `nombre` VARCHAR(50) DEFAULT NULL,
+  `email` VARCHAR(100) DEFAULT NULL,
   `rol` ENUM('propietario', 'usuario', 'admin') DEFAULT 'usuario',
   `foto_url` VARCHAR(255) DEFAULT NULL,
   `fecha_registro` DATETIME DEFAULT CURRENT_TIMESTAMP,
