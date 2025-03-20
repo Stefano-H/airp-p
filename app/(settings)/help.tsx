@@ -45,7 +45,7 @@ import {
             <View style={styles.faqItem}>
               <Text style={styles.faqQuestion}>¿Cómo puedo contactar con el soporte?</Text>
               <Text style={styles.faqAnswer}>
-                Puedes contactar con el soporte a través de la sección de ayuda en nuestra aplicación o enviando un correo electrónico a RentaFestiva@gmail.com.
+                Puedes contactar con el soporte a través de la sección de ayuda en nuestra aplicación o enviando un correo electrónico a AlquilaTuEvento@gmail.com.
               </Text>
             </View>
             <View style={styles.faqItem}>
@@ -92,7 +92,7 @@ import {
           ) : null}
           <View style={styles.contactInfo}>
             <Text style={styles.infoLabel}>O contáctanos por:</Text>
-            <Text style={styles.infoText}>Email: RentaFestiva@gmail.com</Text>
+            <Text style={styles.infoText}>Email: AlquilaTuEvento@gmail.com</Text>
             <Text style={styles.infoText}>Teléfono: +34561684369</Text>
           </View>
         </View>
