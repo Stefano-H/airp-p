@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "airbnb",
-    "slug": "airbnb",
+    "name": "AlquilaTuEvento",
+    "slug": "AlquilaTuEvento",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

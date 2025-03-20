@@ -24,7 +24,7 @@ const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'airbnb',
+  database: 'AlquilaTuEvento',
   port: 3307,
   waitForConnections: true,
   connectionLimit: 10,
