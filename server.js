@@ -623,6 +623,29 @@ app.post('/create-listing', async (req, res) => {
 });
 
 
+app.post('/api/update-user', async (req, res) => {
+  const { clerkId, fullName, email, phoneNumber } = req.body;
+  console.log('Endpoint /api/update-user - Payload recibido:', req.body);
+
+  if (!clerkId) {
+    console.error('Falta el clerkId en la petición');
+    return res.status(400).json({ error: 'Se requiere el clerkId' });
+  }
+  try {
+    const query = "UPDATE usuarios SET nombre = ?, email = ?, phoneNumber = ? WHERE clerk_id = ?";
+    const values = [fullName, email, phoneNumber, clerkId];
+    console.log('Ejecutando query con valores:', values);
+    await pool.query(query, values);
+    console.log('Actualización en la base de datos completada');
+    res.json({ message: 'Datos del usuario actualizados correctamente' });
+  } catch (error) {
+    console.error('Error en /api/update-user:', error);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+});
+
+
+
 // Iniciar el servidor
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
