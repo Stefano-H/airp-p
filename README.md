@@ -16,6 +16,13 @@ Ser la manera más fácil de reservar y alquilar locales para eventos en Latinoa
 - js
 - typescript
 - sql
+
+## Componentes
+- Clerk
+- Expo Go
+- Ngrok
+- Email JS
+
 ## Diagramas
 ### Diagrama de Clases
 ![Descripción de la imagen](Media/DiagramaDeClases.png)
