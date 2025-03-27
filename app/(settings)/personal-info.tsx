@@ -11,6 +11,7 @@ import { useUser } from '@clerk/clerk-expo';
 import { Stack } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { useState, useEffect } from 'react';
+import API_BASE_URL from '@/utils/apiConfig';
 
 const PersonalInfo = () => {
   const { user } = useUser();
@@ -20,44 +21,67 @@ const PersonalInfo = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [emailObj, setEmailObj] = useState<any>(null);
+  const [address, setAddress] = useState(''); // Estado para Dirección
+  const [phone, setPhone] = useState('');     // Estado para Teléfono
 
   useEffect(() => {
     if (user) {
       setFirstName(user.firstName || '');
       setLastName(user.lastName || '');
       setEmail(user.emailAddresses?.[0]?.emailAddress || '');
+      // Si tuvieras valores previos de dirección o teléfono, los inicializas aquí.
+      // setAddress(user.address || '');
+      // setPhone(user.phone || '');
     }
   }, [user]);
 
-  const handleUpdate = async (field: string, value: any) => {
-    try {
-      console.log(`Actualizando ${field} en Clerk:`, value);
+// Función para guardar todos los cambios en un único botón
+const handleUpdateUser = async () => {
+  if (!user) return;
+  // Actualizar el nombre en Clerk
+  try {
+    await user.update({ firstName, lastName });
+  } catch (error: any) {
+    console.error('Error actualizando nombre en Clerk:', error);
+    alert('Error actualizando nombre en Clerk');
+    return;
+  }
 
-      if (field === 'firstName' || field === 'lastName') {
-        await user.update({ firstName, lastName });
-      } else if (field === 'email') {
-        if (!value || value.trim() === '') {
-          alert('El correo electrónico no puede estar vacío.');
-          return;
-        }
-
-        const existingEmail = user.emailAddresses.find(e => e.emailAddress === value);
-        if (existingEmail) {
-          await existingEmail.delete();
-        }
-
-        const newEmail = await user.createEmailAddress({ emailAddress: value });
-        console.log('Correo electrónico creado:', newEmail);
-        await newEmail.prepareVerification();
-        setEmailObj(newEmail);
-        setIsVerifying(true);
-      }
-
-      console.log(`${field} actualizado correctamente.`);
-    } catch (error: any) {
-      console.error('Error actualizando:', error.toString());
-    }
+  const payload = {
+    clerkId: user.id, // Suponemos que user.id es el clerkId
+    fullName: `${firstName} ${lastName}`,
+    email,
+    direccion: address,
+    telefono: phone,
   };
+
+  try {
+    console.log('Enviando payload:', payload);
+    const response = await fetch(`${API_BASE_URL}/api/update-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+    console.log('Respuesta recibida:', response);
+
+    // Imprimir el status y el cuerpo de la respuesta
+    const data = await response.json();
+    console.log('Datos de respuesta:', data);
+    
+    if (response.ok) {
+      alert('Datos actualizados correctamente');
+    } else {
+      console.error('Error en la actualización:', data);
+      alert('Error al actualizar: ' + data.error);
+    }
+  } catch (error) {
+    console.error('Error en la petición fetch:', error);
+    alert('Error en la comunicación con el servidor');
+  }
+};
+
 
   const handleVerify = async () => {
     try {
@@ -84,22 +108,58 @@ const PersonalInfo = () => {
 
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Nombre completo</Text>
-          <TextInput value={firstName} onChangeText={setFirstName} onBlur={() => handleUpdate('firstName', firstName)} style={styles.input} />
-          <TextInput value={lastName} onChangeText={setLastName} onBlur={() => handleUpdate('lastName', lastName)} style={styles.input} />
+          <TextInput 
+            value={firstName} 
+            onChangeText={setFirstName} 
+            style={styles.input} 
+          />
+          <TextInput 
+            value={lastName} 
+            onChangeText={setLastName} 
+            style={styles.input} 
+          />
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Correo electrónico</Text>
-          <TextInput value={email} onChangeText={setEmail} style={styles.input} />
-          <TouchableOpacity onPress={() => handleUpdate('email', email)}>
-            <Text style={styles.linkText}>Guardar</Text>
-          </TouchableOpacity>
+          <TextInput 
+            value={email} 
+            onChangeText={setEmail} 
+            style={styles.input} 
+          />
         </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Dirección</Text>
+          <TextInput 
+            value={address} 
+            onChangeText={setAddress} 
+            style={styles.input} 
+          />
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionLabel}>Teléfono</Text>
+          <TextInput 
+            value={phone} 
+            onChangeText={setPhone} 
+            style={styles.input} 
+            keyboardType="phone-pad"
+          />
+        </View>
+
+        <TouchableOpacity onPress={handleUpdateUser}>
+          <Text style={styles.linkText}>Guardar cambios</Text>
+        </TouchableOpacity>
 
         {isVerifying && (
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Verificar Código</Text>
-            <TextInput value={verificationCode} onChangeText={setVerificationCode} style={styles.input} />
+            <TextInput 
+              value={verificationCode} 
+              onChangeText={setVerificationCode} 
+              style={styles.input} 
+            />
             <TouchableOpacity onPress={handleVerify}>
               <Text style={styles.linkText}>Verificar</Text>
             </TouchableOpacity>
