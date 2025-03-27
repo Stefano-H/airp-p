@@ -11,7 +11,6 @@ import { useUser } from '@clerk/clerk-expo';
 import { Stack } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { useState, useEffect } from 'react';
-import API_BASE_URL from '@/utils/apiConfig';
 
 const PersonalInfo = () => {
   const { user } = useUser();
@@ -35,53 +34,67 @@ const PersonalInfo = () => {
     }
   }, [user]);
 
-// Función para guardar todos los cambios en un único botón
-const handleUpdateUser = async () => {
-  if (!user) return;
-  // Actualizar el nombre en Clerk
-  try {
-    await user.update({ firstName, lastName });
-  } catch (error: any) {
-    console.error('Error actualizando nombre en Clerk:', error);
-    alert('Error actualizando nombre en Clerk');
-    return;
-  }
-
-  const payload = {
-    clerkId: user.id, // Suponemos que user.id es el clerkId
-    fullName: `${firstName} ${lastName}`,
-    email,
-    direccion: address,
-    telefono: phone,
-  };
-
-  try {
-    console.log('Enviando payload:', payload);
-    const response = await fetch(`${API_BASE_URL}/api/update-user`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(payload),
-    });
-    console.log('Respuesta recibida:', response);
-
-    // Imprimir el status y el cuerpo de la respuesta
-    const data = await response.json();
-    console.log('Datos de respuesta:', data);
+  // Función para guardar todos los cambios en un único botón
+  const handleUpdateUser = async () => {
+    if (!user) return;
     
-    if (response.ok) {
-      alert('Datos actualizados correctamente');
-    } else {
-      console.error('Error en la actualización:', data);
-      alert('Error al actualizar: ' + data.error);
+    // Actualizar nombre en Clerk
+    try {
+      await user.update({ firstName, lastName });
+    } catch (error: any) {
+      console.error('Error actualizando nombre en Clerk:', error);
+      alert('Error actualizando nombre en Clerk');
+      return;
     }
-  } catch (error) {
-    console.error('Error en la petición fetch:', error);
-    alert('Error en la comunicación con el servidor');
-  }
-};
+    
+    // Si no existe un número de teléfono en Clerk y se ingresó uno, crearlo y preparar verificación
+    try {
+      console.log('user.phone_numbers:', user.phoneNumbers);
+      if (phone && (!user.phoneNumbers || user.phoneNumbers.length === 0)) {
+        console.log('Creando número de teléfono en Clerk:', phone);
+        const newPhone = await user.createPhoneNumber({ phoneNumber: phone });
+        console.log('Nuevo número de teléfono creado:', newPhone);
+        await newPhone.prepareVerification();
+      }
+    } catch (error: any) {
+      console.error('Error creando/verificando el número de teléfono en Clerk:', error.message, error.stack);
+      alert('Error creando el número de teléfono en Clerk: ' + error.message);
+      return;
+    }
+    
 
+    const payload = {
+      clerkId: user.id, // Suponemos que user.id es el clerkId
+      fullName: `${firstName} ${lastName}`,
+      email,
+      direccion: address,
+      telefono: phone,
+    };
+
+    try {
+      console.log('Enviando payload:', payload);
+      const response = await fetch('http://localhost:3000/api/update-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+      console.log('Respuesta recibida:', response);
+      const data = await response.json();
+      console.log('Datos de respuesta:', data);
+      
+      if (response.ok) {
+        alert('Datos actualizados correctamente');
+      } else {
+        console.error('Error en la actualización:', data);
+        alert('Error al actualizar: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error en la petición fetch:', error);
+      alert('Error en la comunicación con el servidor');
+    }
+  };
 
   const handleVerify = async () => {
     try {

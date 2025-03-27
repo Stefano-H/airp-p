@@ -37,6 +37,3 @@ Ser la manera más fácil de reservar y alquilar locales para eventos en Latinoa
 ![Descripción de la imagen](Media/PaletaDeColores.png)
 ### Logo
 ![Descripción de la imagen](Media/inca3.1.png)
-### Funcionalidades Web
-...
-## Roadmap/Trello/Gantt
