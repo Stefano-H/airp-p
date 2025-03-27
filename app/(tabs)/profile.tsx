@@ -166,7 +166,7 @@ useFocusEffect(
               style={styles.settingItem}
               onPress={() => router.push('/(settings)/security')}
             >
-              <Text style={styles.settingText}>Inicio de sesión y seguridad</Text>
+              <Text style={styles.settingText}>Seguridad</Text>
               <Ionicons name="chevron-forward" size={20} color={Colors.dark} />
             </TouchableOpacity>
 
@@ -175,6 +175,14 @@ useFocusEffect(
               onPress={() => router.push('/(settings)/payments')}
             >
               <Text style={styles.settingText}>Pagos y cobros</Text>
+              <Ionicons name="chevron-forward" size={20} color={Colors.dark} />
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.settingItem}
+              onPress={() => router.push('/(settings)/historial-pagos')}
+            >
+              <Text style={styles.settingText}>Historial de pagos</Text>
               <Ionicons name="chevron-forward" size={20} color={Colors.dark} />
             </TouchableOpacity>
 

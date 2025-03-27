@@ -11,6 +11,8 @@ import { useUser } from '@clerk/clerk-expo';
 import { Stack } from 'expo-router';
 import Colors from '@/constants/Colors';
 import { useState, useEffect } from 'react';
+import API_BASE_URL from '@/utils/apiConfig';
+import CustomAlert from '@/components/CustomAlert';
 
 const PersonalInfo = () => {
   const { user } = useUser();
@@ -22,6 +24,10 @@ const PersonalInfo = () => {
   const [emailObj, setEmailObj] = useState<any>(null);
   const [address, setAddress] = useState(''); // Estado para Dirección
   const [phone, setPhone] = useState('');     // Estado para Teléfono
+  const [alertVisible, setAlertVisible] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+
 
   useEffect(() => {
     if (user) {
@@ -34,67 +40,86 @@ const PersonalInfo = () => {
     }
   }, [user]);
 
-  // Función para guardar todos los cambios en un único botón
-  const handleUpdateUser = async () => {
-    if (!user) return;
-    
-    // Actualizar nombre en Clerk
-    try {
-      await user.update({ firstName, lastName });
-    } catch (error: any) {
-      console.error('Error actualizando nombre en Clerk:', error);
-      alert('Error actualizando nombre en Clerk');
-      return;
-    }
-    
-    // Si no existe un número de teléfono en Clerk y se ingresó uno, crearlo y preparar verificación
-    try {
-      console.log('user.phone_numbers:', user.phoneNumbers);
-      if (phone && (!user.phoneNumbers || user.phoneNumbers.length === 0)) {
-        console.log('Creando número de teléfono en Clerk:', phone);
-        const newPhone = await user.createPhoneNumber({ phoneNumber: phone });
-        console.log('Nuevo número de teléfono creado:', newPhone);
-        await newPhone.prepareVerification();
-      }
-    } catch (error: any) {
-      console.error('Error creando/verificando el número de teléfono en Clerk:', error.message, error.stack);
-      alert('Error creando el número de teléfono en Clerk: ' + error.message);
-      return;
-    }
-    
+  // Modifica el useEffect para capturar la respuesta en texto plano:
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/get-user?clerkId=${user.id}`);
+        
+        // Verifica si la respuesta es exitosa
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Error ${response.status}: ${errorText}`);
+        }
 
-    const payload = {
-      clerkId: user.id, // Suponemos que user.id es el clerkId
-      fullName: `${firstName} ${lastName}`,
-      email,
-      direccion: address,
-      telefono: phone,
+        const data = await response.json();
+        setAddress(data.dirección || '');
+        setPhone(data.telefono || '');
+
+      } catch (error) {
+        console.error('Error cargando datos:', error);
+        alert('Error al cargar datos. Verifica la consola.');
+      }
     };
 
-    try {
-      console.log('Enviando payload:', payload);
-      const response = await fetch('http://localhost:3000/api/update-user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-      console.log('Respuesta recibida:', response);
-      const data = await response.json();
-      console.log('Datos de respuesta:', data);
-      
-      if (response.ok) {
-        alert('Datos actualizados correctamente');
-      } else {
-        console.error('Error en la actualización:', data);
-        alert('Error al actualizar: ' + data.error);
-      }
-    } catch (error) {
-      console.error('Error en la petición fetch:', error);
-      alert('Error en la comunicación con el servidor');
-    }
+    loadUserData();
+  }, [user]);
+
+// Función para guardar todos los cambios en un único botón
+const handleUpdateUser = async () => {
+  if (!user) return;
+
+  // 1. Actualizar nombre en Clerk
+  try {
+    await user.update({ firstName, lastName });
+  } catch (error: any) {
+    console.error('Error actualizando nombre:', error);
+    alert('Error actualizando nombre');
+    return;
+  }
+
+  // 2. Actualizar datos en tu backend
+  const payload = {
+    clerkId: user.id,
+    fullName: `${firstName} ${lastName}`,
+    email,
+    direccion: address,
+    telefono: phone,
   };
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/update-user`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      // Actualización exitosa
+      setAlertTitle('¡Éxito!');
+      setAlertMessage('Tus datos se han actualizado correctamente.');
+      setAlertVisible(true);
+      
+      // Recargar datos
+      const refreshResponse = await fetch(`${API_BASE_URL}/api/get-user?clerkId=${user.id}`);
+      const refreshData = await refreshResponse.json();
+      setAddress(refreshData.dirección || '');
+      setPhone(refreshData.telefono || '');
+      
+    } else {
+      setAlertTitle('Error');
+      setAlertMessage('No se pudo guardar la información. Inténtalo de nuevo.');
+      setAlertVisible(true);
+    }
+  } catch (error) {
+    setAlertTitle('Error crítico');
+    setAlertMessage(typeof error === 'string' ? error : 'Ocurrió un error inesperado');
+    setAlertVisible(true);
+  }
+};
+
 
   const handleVerify = async () => {
     try {
@@ -161,9 +186,10 @@ const PersonalInfo = () => {
           />
         </View>
 
-        <TouchableOpacity onPress={handleUpdateUser}>
-          <Text style={styles.linkText}>Guardar cambios</Text>
+        <TouchableOpacity onPress={handleUpdateUser} style={styles.button}>
+          <Text style={styles.buttonText}>Guardar cambios</Text>
         </TouchableOpacity>
+
 
         {isVerifying && (
           <View style={styles.section}>
@@ -178,17 +204,50 @@ const PersonalInfo = () => {
             </TouchableOpacity>
           </View>
         )}
+
+        <CustomAlert
+          visible={alertVisible}
+          title={alertTitle}
+          message={alertMessage}
+          onClose={() => setAlertVisible(false)}
+        />
+
       </ScrollView>
     </SafeAreaView>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   headerTitle: { fontFamily: 'mon-b', fontSize: 24, color: Colors.dark },
   section: { gap: 8 },
   sectionLabel: { fontFamily: 'mon-sb', fontSize: 16, color: Colors.dark },
   linkText: { fontFamily: 'mon', color: Colors.primary, fontSize: 16 },
-  input: { fontFamily: 'mon', fontSize: 16, color: Colors.dark, borderWidth: 1, borderColor: Colors.grey, borderRadius: 8, padding: 10 },
+  input: { 
+    fontFamily: 'mon', 
+    fontSize: 16, 
+    color: Colors.dark, 
+    borderWidth: 1, 
+    borderColor: Colors.grey, 
+    borderRadius: 8, 
+    padding: 10 
+  },
+  button: {
+    backgroundColor: Colors.primary, // Color del botón
+    paddingVertical: 12, 
+    paddingHorizontal: 24, 
+    borderRadius: 8, 
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+  },
+  buttonText: {
+    fontFamily: 'mon-sb',
+    color: '#fff', // Texto en color blanco para contraste
+    fontSize: 16,
+  },
 });
+
 
 export default PersonalInfo;

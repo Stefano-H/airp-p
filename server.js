@@ -644,7 +644,30 @@ app.post('/api/update-user', async (req, res) => {
   }
 });
 
+// Nuevo endpoint para obtener datos del usuario
+app.get('/api/get-user', async (req, res) => { // <-- Usa comillas simples
+  const { clerkId } = req.query;
 
+  if (!clerkId) {
+    return res.status(400).json({ error: 'Se requiere clerkId' });
+  }
+
+  try {
+    const [results] = await pool.query(
+      'SELECT nombre, email, dirección, telefono FROM usuarios WHERE clerk_id = ?',
+      [clerkId]
+    );
+
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json(results[0]); // <-- Devuelve JSON
+  } catch (error) {
+    console.error('Error al obtener usuario:', error);
+    res.status(500).json({ error: 'Error en el servidor' }); // <-- Siempre devuelve JSON
+  }
+});
 
 // Iniciar el servidor
 app.listen(port, () => {

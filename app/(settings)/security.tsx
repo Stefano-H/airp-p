@@ -29,7 +29,7 @@ import {
                 },
                 }}
             />
-          <Text style={styles.headerTitle}>Inicio de sesión y seguridad</Text>
+          <Text style={styles.headerTitle}>Seguridad</Text>
   
           <TouchableOpacity style={styles.securityItem}>
             <Text style={styles.securityTitle}>Configura la autenticación en 2 pasos</Text>
@@ -42,19 +42,6 @@ import {
             </View>
           </TouchableOpacity>
   
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Iniciar sesión</Text>
-            
-            <View style={styles.securityItem}>
-              <View>
-                <Text style={styles.securityTitle}>Contraseña</Text>
-                <Text style={styles.securitySubtitle}>Última actualización: hace 2 meses</Text>
-              </View>
-              <TouchableOpacity>
-                <Text style={styles.linkText}>Actualizar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
         </ScrollView>
       </SafeAreaView>
     );
