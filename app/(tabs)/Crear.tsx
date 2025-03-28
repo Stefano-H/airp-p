@@ -1,14 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
+import { useAuth } from '@clerk/clerk-expo';
 
 export default function App() {
-    const router = useRouter();
-    const [showMessage, setShowMessage] = useState(false);
+  const router = useRouter();
+  const { isSignedIn } = useAuth();
 
-    const handleStart = () => {
-        router.push('/(pages)/(+apartamento)/paso1.1');
-    };
+  const handleStart = () => {
+    if (!isSignedIn) {
+      // Si el usuario no está logueado, muestra el modal de login
+      router.push('/(modals)/login');
+    } else {
+      // Si el usuario ya está logueado, continúa con el flujo normal
+      router.push('/(pages)/(+apartamento)/paso1.1');
+    }
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -18,7 +25,7 @@ export default function App() {
           headerTitleStyle: {
             fontFamily: 'mon-b',
             fontSize: 22,
-            marginTop: 20, // Ajusta este valor según sea necesario
+            marginTop: 20,
           },
         }}
       />
@@ -94,15 +101,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  messageContainer: {
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 20,
-  },
-  messageText: {
-    color: 'white',
-    textAlign: 'center',
   },
 });

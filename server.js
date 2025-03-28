@@ -669,6 +669,37 @@ app.get('/api/get-user', async (req, res) => { // <-- Usa comillas simples
   }
 });
 
+// Nuevo endpoint para buscar listings sin filtrar por "estado"
+app.get('/api/search-listings', async (req, res) => {
+  const { destino } = req.query;
+  let query = `
+    SELECT 
+      l.id, 
+      l.nombre AS name, 
+      l.descripción AS description, 
+      l.precio AS price, 
+      l.foto1, 
+      d.ciudad, 
+      d.distrito 
+    FROM listings l
+    LEFT JOIN direccion d ON l.id = d.id
+  `;
+  let values = [];
+  if (destino) {
+    query += ` WHERE LOWER(d.ciudad) LIKE ?`;
+    const term = '%' + destino.toLowerCase() + '%';
+    values.push(term);
+  }
+  try {
+    const [results] = await pool.query(query, values);
+    res.json(results);
+  } catch (error) {
+    console.error('Error al buscar listings:', error);
+    res.status(500).send('Error en el servidor');
+  }
+});
+
+
 // Iniciar el servidor
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);

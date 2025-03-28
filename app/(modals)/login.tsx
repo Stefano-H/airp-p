@@ -49,7 +49,7 @@ const Page = () => {
       />
 
       <TouchableOpacity style={defaultStyles.btn}>
-        <Text style={defaultStyles.btnText}>Continue</Text>
+        <Text style={defaultStyles.btnText}>Continuar</Text>
       </TouchableOpacity>
 
       <View style={styles.seperatorView}>
@@ -60,7 +60,7 @@ const Page = () => {
             borderBottomWidth: StyleSheet.hairlineWidth,
           }}
         />
-        <Text style={styles.seperator}>or</Text>
+        <Text style={styles.seperator}>o</Text>
         <View
           style={{
             flex: 1,
@@ -73,22 +73,22 @@ const Page = () => {
       <View style={{ gap: 20 }}>
         <TouchableOpacity style={styles.btnOutline}>
           <Ionicons name="mail-outline" size={24} style={defaultStyles.btnIcon} />
-          <Text style={styles.btnOutlineText}>Continue with Phone</Text>
+          <Text style={styles.btnOutlineText}>Continuar con Phone</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.btnOutline} onPress={() => onSelectAuth(Strategy.Apple)}>
           <Ionicons name="logo-apple" size={24} style={defaultStyles.btnIcon} />
-          <Text style={styles.btnOutlineText}>Continue with Apple</Text>
+          <Text style={styles.btnOutlineText}>Continuar con Apple</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.btnOutline} onPress={() => onSelectAuth(Strategy.Google)}>
           <Ionicons name="logo-google" size={24} style={defaultStyles.btnIcon} />
-          <Text style={styles.btnOutlineText}>Continue with Google</Text>
+          <Text style={styles.btnOutlineText}>Continuar con Google</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.btnOutline} onPress={() => onSelectAuth(Strategy.Facebook)}>
           <Ionicons name="logo-facebook" size={24} style={defaultStyles.btnIcon} />
-          <Text style={styles.btnOutlineText}>Continue with Facebook</Text>
+          <Text style={styles.btnOutlineText}>Continuar con Facebook</Text>
         </TouchableOpacity>
       </View>
     </View>
