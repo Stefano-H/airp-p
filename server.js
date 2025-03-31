@@ -725,7 +725,6 @@ app.post('/api/getOwnerStatus', async (req, res) => {
 app.post('/api/updateUserDocuments', async (req, res) => {
   const { clerk_id, documentopersonal_adelante, documentopersonal_detras, documentodomicilio } = req.body;
 
-  // Validación actualizada
   if (!clerk_id || !documentopersonal_adelante || !documentopersonal_detras || !documentodomicilio) {
     return res.status(400).json({ error: 'Faltan documentos requeridos' });
   }
@@ -735,7 +734,8 @@ app.post('/api/updateUserDocuments', async (req, res) => {
       `UPDATE usuarios 
       SET documentopersonaladelante = ?, 
           documentopersonaldetras = ?,
-          documentodomicilio = ?
+          documentodomicilio = ?,
+          revision = 1 
       WHERE clerk_id = ?`,
       [documentopersonal_adelante, documentopersonal_detras, documentodomicilio, clerk_id]
     );
@@ -744,7 +744,7 @@ app.post('/api/updateUserDocuments', async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    res.json({ message: 'Documentación actualizada exitosamente' });
+    res.json({ message: 'Documentación actualizada y en revisión' });
   } catch (error) {
     console.error('Error en la base de datos:', error);
     res.status(500).json({ error: 'Error al guardar la documentación' });

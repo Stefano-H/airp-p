@@ -150,7 +150,9 @@ CREATE TABLE IF NOT EXISTS `AlquilaTuEvento`.`usuarios` (
   `propietario` TINYINT(1) DEFAULT '0',
   `documentopersonaladelante` VARCHAR(255) DEFAULT NULL,
   `documentopersonaldetras` VARCHAR(255) DEFAULT NULL,
+  `fotocara` VARCHAR(255) DEFAULT NULL,
   `documentodomicilio` VARCHAR(255) DEFAULT NULL,
+  `revision` TINYINT(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_clerk_id` (`clerk_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
