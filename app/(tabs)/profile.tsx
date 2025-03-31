@@ -172,17 +172,27 @@ useFocusEffect(
 
             <TouchableOpacity 
               style={styles.settingItem}
-              onPress={() => router.push('/(settings)/payments')}
+              onPress={() => router.push('/(settings)/historial-pagos')}
             >
-              <Text style={styles.settingText}>Pagos y cobros</Text>
+              <Text style={styles.settingText}>Historial de pagos</Text>
+              <Ionicons name="chevron-forward" size={20} color={Colors.dark} />
+            </TouchableOpacity>
+
+            <Text style={styles.sectionHeader}>Propietarios</Text>
+
+            <TouchableOpacity 
+              style={styles.settingItem}
+              onPress={() => router.push('/(settings)/VerificarPropietario')}
+            >
+              <Text style={styles.settingText}>Verificar cuenta</Text>
               <Ionicons name="chevron-forward" size={20} color={Colors.dark} />
             </TouchableOpacity>
 
             <TouchableOpacity 
               style={styles.settingItem}
-              onPress={() => router.push('/(settings)/historial-pagos')}
+              onPress={() => router.push('/(settings)/payments')}
             >
-              <Text style={styles.settingText}>Historial de pagos</Text>
+              <Text style={styles.settingText}>Pagos y cobros</Text>
               <Ionicons name="chevron-forward" size={20} color={Colors.dark} />
             </TouchableOpacity>
 

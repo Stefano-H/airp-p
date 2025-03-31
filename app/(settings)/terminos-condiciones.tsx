@@ -79,7 +79,7 @@ const TerminosCondiciones = () => {
 
         <Text style={styles.subtitle}>11. Contacto</Text>
         <Text style={styles.text}>
-          Si tienes preguntas o inquietudes sobre estos Términos y Condiciones, puedes contactarnos a través de [correo de contacto].
+          Si tienes preguntas o inquietudes sobre estos Términos y Condiciones, puedes contactarnos a través de alquilatueventonline@gmail.com.
         </Text>
       </View>
     </ScrollView>

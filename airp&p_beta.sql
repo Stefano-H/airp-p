@@ -147,6 +147,7 @@ CREATE TABLE IF NOT EXISTS `AlquilaTuEvento`.`usuarios` (
   `fecha_registro` DATETIME DEFAULT CURRENT_TIMESTAMP,
   `dirección` VARCHAR(255) DEFAULT NULL,
   `telefono` VARCHAR(20) DEFAULT NULL,
+  `propietario` TINYINT(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_clerk_id` (`clerk_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

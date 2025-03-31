@@ -60,7 +60,7 @@ const PoliticaPrivacidad = () => {
 
           <Text style={styles.subtitle}>5. Tus derechos</Text>
           <Text style={styles.text}>
-          Tienes derecho a acceder, corregir o eliminar tu información personal. Si deseas ejercer estos derechos, contáctanos a alquilatuevento@gmail.com.
+          Tienes derecho a acceder, corregir o eliminar tu información personal. Si deseas ejercer estos derechos, contáctanos a alquilatueventonline@gmail.com.
           </Text>
 
           <Text style={styles.subtitle}>6. Cambios en la política</Text>
@@ -70,7 +70,7 @@ const PoliticaPrivacidad = () => {
 
           <Text style={styles.subtitle}>7. Contacto</Text>
           <Text style={styles.text}>
-          Si tienes preguntas sobre esta política, puedes contactarnos en alquilatuevento@gmail.com.
+          Si tienes preguntas sobre esta política, puedes contactarnos en alquilatueventonline@gmail.com.
           </Text>
       </View>
   </ScrollView>
