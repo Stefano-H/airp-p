@@ -1,24 +1,23 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { Stack, useRouter } from 'expo-router';
 import { useUser } from '@clerk/clerk-expo';
-import { useRouter, Stack } from 'expo-router';
 import API_BASE_URL from '@/utils/apiConfig';
 
-const VerificarPropietario = () => {
+const VerificacionDetalles = () => {
   const { user } = useUser();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
-  const handleVerification = async () => {
-    // Verifica que se tenga el clerkId del usuario
+  const handleSubmitVerification = async () => {
     if (!user?.id) {
       Alert.alert('Error', 'No se pudo obtener el identificador del usuario.');
       return;
     }
     try {
       setLoading(true);
-      // Llamamos al endpoint que verifica el estado de propietario
-      const response = await fetch(`${API_BASE_URL}/api/verifyOwner`, {
+      // Llamada al endpoint para enviar la solicitud de verificación
+      const response = await fetch(`${API_BASE_URL}/api/submitVerification`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ clerkId: user.id }),
@@ -26,11 +25,11 @@ const VerificarPropietario = () => {
       const data = await response.json();
       setLoading(false);
       if (response.ok) {
-        Alert.alert('Verificación exitosa', 'Tu cuenta ha sido verificada como propietario.');
-        // Redirige a la página para crear un anuncio o la sección principal
+        Alert.alert('Verificación enviada', 'Tu solicitud de verificación ha sido enviada. Espera la confirmación.');
+        // Redirige al usuario al siguiente paso (por ejemplo, a la pantalla para crear un anuncio)
         router.push('/(pages)/(+apartamento)/paso1.1');
       } else {
-        Alert.alert('Error', data.error || 'No se pudo verificar tu cuenta. Inténtalo de nuevo más tarde.');
+        Alert.alert('Error', data.error || 'No se pudo enviar la verificación. Inténtalo de nuevo más tarde.');
       }
     } catch (error) {
       setLoading(false);
@@ -40,65 +39,83 @@ const VerificarPropietario = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Stack.Screen 
         options={{
-          title: '',
+          title: 'Verifica tu cuenta',
           headerTitleStyle: { fontFamily: 'mon-b', fontSize: 20, marginTop: 20 },
         }} 
       />
-      <Text style={styles.title}>Verifica tu cuenta como propietario</Text>
-      <Text style={styles.description}>
-        Para poder publicar tus espacios en AlquilaTuEvento, es necesario que verifiques tu cuenta como propietario.
-        Presiona el botón a continuación para confirmar tu verificación. Si tienes dudas o necesitas asistencia,
-        visita la sección de Perfil.
-      </Text>
-      <TouchableOpacity style={styles.button} onPress={handleVerification} disabled={loading}>
+
+      <Text style={styles.stepDescription}>
+         Para poder publicar tus espacios en AlquilaTuEvento, es necesario que verifiques tu cuenta como propietario.
+         Asegúrate de que la información de tu perfil esté actualizada.
+       </Text>
+
+       <Text></Text>
+
+       <View style={styles.step}>
+        <Text style={styles.stepTitle}>Documentación Personal</Text>
+        <Text style={styles.stepDescription}>
+          Sube una copia de tu identificación oficial (INE, pasaporte, etc.) para verificar tu identidad. 
+        </Text>
+      </View>
+
+      <View style={styles.step}>
+        <Text style={styles.stepTitle}>Documentación Inmuebles</Text>
+        <Text style={styles.stepDescription}>
+          Sube los documentos que acrediten la propiedad de tu inmueble, por ejemplo, comprobante de domicilio o escritura.
+        </Text>
+      </View>
+
+      <TouchableOpacity style={styles.button} onPress={handleSubmitVerification} disabled={loading}>
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>Verificar cuenta</Text>
+          <Text style={styles.buttonText}>Comenzar proceso</Text>
         )}
       </TouchableOpacity>
-    </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     padding: 20,
     backgroundColor: '#fff',
-    justifyContent: 'center',
   },
-  title: {
-    fontFamily: 'mon-b',
-    fontSize: 24,
-    fontWeight: 'bold',
+  step: {
     marginBottom: 20,
-    textAlign: 'center',
+    padding: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
   },
-  description: {
+  stepTitle: {
+    fontFamily: 'mon-b',
+    fontSize: 18,
+    marginTop: 5,
+    fontWeight: 'bold',
+  },
+  stepDescription: {
     fontFamily: 'mon',
     fontSize: 16,
-    lineHeight: 22,
-    color: '#555',
-    marginBottom: 30,
-    textAlign: 'center',
+    marginTop: 5,
   },
   button: {
+    marginTop: 20,
     backgroundColor: '#ff385c',
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderRadius: 8,
     alignItems: 'center',
-    alignSelf: 'center',
-    width: '80%',
   },
   buttonText: {
     fontFamily: 'mon-sb',
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 
-export default VerificarPropietario;
+export default VerificacionDetalles;
