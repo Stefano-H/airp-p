@@ -721,6 +721,36 @@ app.post('/api/getOwnerStatus', async (req, res) => {
   }
 });
 
+// server.js (corregido)
+app.post('/api/updateUserDocuments', async (req, res) => {
+  const { clerk_id, documentopersonal_adelante, documentopersonal_detras, documentodomicilio } = req.body;
+
+  // Validación actualizada
+  if (!clerk_id || !documentopersonal_adelante || !documentopersonal_detras || !documentodomicilio) {
+    return res.status(400).json({ error: 'Faltan documentos requeridos' });
+  }
+
+  try {
+    const [result] = await pool.query(
+      `UPDATE usuarios 
+      SET documentopersonaladelante = ?, 
+          documentopersonaldetras = ?,
+          documentodomicilio = ?
+      WHERE clerk_id = ?`,
+      [documentopersonal_adelante, documentopersonal_detras, documentodomicilio, clerk_id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    res.json({ message: 'Documentación actualizada exitosamente' });
+  } catch (error) {
+    console.error('Error en la base de datos:', error);
+    res.status(500).json({ error: 'Error al guardar la documentación' });
+  }
+});
+
 
 // Iniciar el servidor
 app.listen(port, () => {

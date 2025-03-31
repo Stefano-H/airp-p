@@ -1,41 +1,13 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View, TouchableOpacity, ScrollView } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
-import { useUser } from '@clerk/clerk-expo';
-import API_BASE_URL from '@/utils/apiConfig';
 
 const VerificacionDetalles = () => {
-  const { user } = useUser();
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
 
-  const handleSubmitVerification = async () => {
-    if (!user?.id) {
-      Alert.alert('Error', 'No se pudo obtener el identificador del usuario.');
-      return;
-    }
-    try {
-      setLoading(true);
-      // Llamada al endpoint para enviar la solicitud de verificación
-      const response = await fetch(`${API_BASE_URL}/api/submitVerification`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clerkId: user.id }),
-      });
-      const data = await response.json();
-      setLoading(false);
-      if (response.ok) {
-        Alert.alert('Verificación enviada', 'Tu solicitud de verificación ha sido enviada. Espera la confirmación.');
-        // Redirige al usuario al siguiente paso (por ejemplo, a la pantalla para crear un anuncio)
-        router.push('/(pages)/(+apartamento)/paso1.1');
-      } else {
-        Alert.alert('Error', data.error || 'No se pudo enviar la verificación. Inténtalo de nuevo más tarde.');
-      }
-    } catch (error) {
-      setLoading(false);
-      console.error(error);
-      Alert.alert('Error', 'Ocurrió un error. Por favor, inténtalo de nuevo.');
-    }
+  const handleStartVerification = () => {
+    // Redirigir a la página de verificación de identidad
+    router.push('/verificacion/identidad');
   };
 
   return (
@@ -48,32 +20,28 @@ const VerificacionDetalles = () => {
       />
 
       <Text style={styles.stepDescription}>
-         Para poder publicar tus espacios en AlquilaTuEvento, es necesario que verifiques tu cuenta como propietario.
-         Asegúrate de que la información de tu perfil esté actualizada.
-       </Text>
+        Para poder publicar tus espacios en AlquilaTuEvento, es necesario que verifiques tanto tu identidad como tu domicilio.
+        Asegúrate de que la información de tu perfil esté actualizada.
+      </Text>
 
-       <Text></Text>
+      <Text></Text>
 
-       <View style={styles.step}>
-        <Text style={styles.stepTitle}>Documentación Personal</Text>
+      <View style={styles.step}>
+        <Text style={styles.stepTitle}>Verificación de Identidad</Text>
         <Text style={styles.stepDescription}>
-          Sube una copia de tu identificación oficial (INE, pasaporte, etc.) para verificar tu identidad. 
+          Sube una copia de tu identificación oficial (INE, pasaporte, etc.) y, si es posible, un selfie para confirmar tu identidad.
         </Text>
       </View>
 
       <View style={styles.step}>
-        <Text style={styles.stepTitle}>Documentación Inmuebles</Text>
+        <Text style={styles.stepTitle}>Verificación de Domicilio</Text>
         <Text style={styles.stepDescription}>
-          Sube los documentos que acrediten la propiedad de tu inmueble, por ejemplo, comprobante de domicilio o escritura.
+          Sube un comprobante de domicilio reciente (recibo de luz, agua, etc.) que acredite tu lugar de residencia.
         </Text>
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmitVerification} disabled={loading}>
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Comenzar proceso</Text>
-        )}
+      <TouchableOpacity style={styles.button} onPress={handleStartVerification}>
+        <Text style={styles.buttonText}>Comenzar proceso</Text>
       </TouchableOpacity>
     </ScrollView>
   );
