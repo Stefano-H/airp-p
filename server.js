@@ -702,22 +702,29 @@ app.get('/api/search-listings', async (req, res) => {
 
 app.post('/api/getOwnerStatus', async (req, res) => {
   const { clerkId } = req.body;
+  
   if (!clerkId) {
     return res.status(400).json({ error: 'Falta el parámetro clerkId' });
   }
+
   try {
-    const connection = await pool.getConnection();
-    const query = 'SELECT propietario FROM usuarios WHERE clerk_id = ?';
-    const [results] = await connection.execute(query, [clerkId]);
-    connection.release();
+    const [results] = await pool.query(
+      'SELECT propietario, revision FROM usuarios WHERE clerk_id = ?', 
+      [clerkId]
+    );
+    
     if (results.length === 0) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
-    // Retorna el valor del campo propietario
-    return res.json({ propietario: results[0].propietario });
+
+    res.json({ 
+      propietario: results[0].propietario,
+      revision: results[0].revision 
+    });
+    
   } catch (error) {
     console.error('Error en /api/getOwnerStatus:', error);
-    return res.status(500).json({ error: 'Error en el servidor' });
+    res.status(500).json({ error: 'Error en el servidor' });
   }
 });
 

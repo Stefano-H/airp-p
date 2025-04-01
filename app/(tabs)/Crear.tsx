@@ -25,20 +25,19 @@ export default function App() {
     setAlertVisible(true);
   };
 
+  // Modifica la función handleStart
   const handleStart = async () => {
     if (!isSignedIn) {
-      // Si el usuario no está logueado, muestra el modal de login
       router.push('/(modals)/login');
     } else {
       try {
-        // Extraemos el clerkId del usuario autenticado
         const clerkId = user?.id;
         if (!clerkId) {
           showCustomAlert('Error', 'No se pudo obtener el identificador del usuario.');
           return;
         }
 
-        // Consulta al endpoint para obtener el estado de propietario
+        // Consulta ampliada para obtener estado de revisión
         const response = await fetch(`${API_BASE_URL}/api/getOwnerStatus`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -46,7 +45,13 @@ export default function App() {
         });
         const data = await response.json();
 
-        // Si el usuario no es propietario, mostramos la alerta personalizada
+        // Primero verificar si está en revisión
+        if (data.revision === 1) {
+          router.push('/verificacion/ConfirmacionVerificacion');
+          return;
+        }
+
+        // Luego verificar si es propietario
         if (data.propietario === 0) {
           showCustomAlert(
             'Verificación requerida',
@@ -55,10 +60,10 @@ export default function App() {
           return;
         }
 
-        // Si es propietario, continúa con el flujo normal
+        // Si pasa ambas validaciones, continuar
         router.push('/(pages)/(+apartamento)/paso1.1');
       } catch (error) {
-        console.error('Error al verificar el estado de propietario:', error);
+        console.error('Error al verificar el estado:', error);
         showCustomAlert(
           'Error',
           'Error al verificar tu estado. Por favor, inténtalo de nuevo más tarde.'
