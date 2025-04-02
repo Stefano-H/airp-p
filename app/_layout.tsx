@@ -104,7 +104,7 @@ function RootLayoutNav() {
       <Stack.Screen
         name="(modals)/login"
         options={{
-          title: 'Inicia sesión o regístrate',
+          title: 'Inicia sesión / Regístrate',
           headerTitleStyle: {
             fontFamily: 'mon-sb',
           },

@@ -82,7 +82,7 @@ const handleNext = () => {
         adelante: photos[0], 
         detras: photos[1] 
       });
-      router.push('/verificacion/domicilio');
+      router.push('/verificacion/fotocara');
     } else {
       Alert.alert('Error', 'Sube ambas caras de tu documento');
     }

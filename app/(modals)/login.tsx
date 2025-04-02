@@ -1,11 +1,17 @@
-import Colors from '@/constants/Colors';
-import { useOAuth } from '@clerk/clerk-expo';
+import React from 'react';
+import { 
+  View, 
+  Text, 
+  TouchableOpacity, 
+  StyleSheet, 
+  Image, 
+  SafeAreaView, 
+  ScrollView 
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { View, StyleSheet, TextInput, Text, TouchableOpacity } from 'react-native';
-
-// https://github.com/clerkinc/clerk-expo-starter/blob/main/components/OAuth.tsx
-import { useWarmUpBrowser } from '@/hooks/useWarmUpBrowser';
+import { useOAuth } from '@clerk/clerk-expo';
+import { useRouter, Stack } from 'expo-router';
+import Colors from '@/constants/Colors';
 import { defaultStyles } from '@/constants/Styles';
 
 enum Strategy {
@@ -13,9 +19,8 @@ enum Strategy {
   Apple = 'oauth_apple',
   Facebook = 'oauth_facebook',
 }
-const Page = () => {
-  useWarmUpBrowser();
 
+const LoginPage = () => {
   const router = useRouter();
   const { startOAuthFlow: googleAuth } = useOAuth({ strategy: 'oauth_google' });
   const { startOAuthFlow: appleAuth } = useOAuth({ strategy: 'oauth_apple' });
@@ -30,7 +35,6 @@ const Page = () => {
 
     try {
       const { createdSessionId, setActive } = await selectedAuth();
-
       if (createdSessionId) {
         setActive!({ session: createdSessionId });
         router.back();
@@ -41,79 +45,93 @@ const Page = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        autoCapitalize="none"
-        placeholder="Email"
-        style={[defaultStyles.inputField, { marginBottom: 30 }]}
-      />
-
-      <TouchableOpacity style={defaultStyles.btn}>
-        <Text style={defaultStyles.btnText}>Continuar</Text>
-      </TouchableOpacity>
-
-      <View style={styles.seperatorView}>
-        <View
-          style={{
-            flex: 1,
-            borderBottomColor: 'black',
-            borderBottomWidth: StyleSheet.hairlineWidth,
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scroll}>
+        <Stack.Screen 
+          options={{
+            headerShown: true,
           }}
         />
-        <Text style={styles.seperator}>o</Text>
-        <View
-          style={{
-            flex: 1,
-            borderBottomColor: 'black',
-            borderBottomWidth: StyleSheet.hairlineWidth,
-          }}
-        />
-      </View>
+        {/* Encabezado de la pantalla */}
+        <View style={styles.header}>
+          <Image 
+            source={require('@/assets/images/inca3.1.png')}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text style={styles.title}>Bienvenido a AlquilaTuEvento</Text>
+          <Text style={styles.subtitle}>
+            Accede de forma segura usando tu cuenta de Google, Apple o Facebook.
+          </Text>
+        </View>
 
-      <View style={{ gap: 20 }}>
-        <TouchableOpacity style={styles.btnOutline}>
-          <Ionicons name="mail-outline" size={24} style={defaultStyles.btnIcon} />
-          <Text style={styles.btnOutlineText}>Continuar con Phone</Text>
-        </TouchableOpacity>
+        {/* Botones de autenticación */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.btnOutline} onPress={() => onSelectAuth(Strategy.Google)}>
+            <Ionicons name="logo-google" size={24} style={defaultStyles.btnIcon} />
+            <Text style={styles.btnOutlineText}>Continuar con Google</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.btnOutline} onPress={() => onSelectAuth(Strategy.Apple)}>
-          <Ionicons name="logo-apple" size={24} style={defaultStyles.btnIcon} />
-          <Text style={styles.btnOutlineText}>Continuar con Apple</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.btnOutline} onPress={() => onSelectAuth(Strategy.Apple)}>
+            <Ionicons name="logo-apple" size={24} style={defaultStyles.btnIcon} />
+            <Text style={styles.btnOutlineText}>Continuar con Apple</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity style={styles.btnOutline} onPress={() => onSelectAuth(Strategy.Google)}>
-          <Ionicons name="logo-google" size={24} style={defaultStyles.btnIcon} />
-          <Text style={styles.btnOutlineText}>Continuar con Google</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={styles.btnOutline} onPress={() => onSelectAuth(Strategy.Facebook)}>
+            <Ionicons name="logo-facebook" size={24} style={defaultStyles.btnIcon} />
+            <Text style={styles.btnOutlineText}>Continuar con Facebook</Text>
+          </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity style={styles.btnOutline} onPress={() => onSelectAuth(Strategy.Facebook)}>
-          <Ionicons name="logo-facebook" size={24} style={defaultStyles.btnIcon} />
-          <Text style={styles.btnOutlineText}>Continuar con Facebook</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+        {/* Pie de página o texto adicional */}
+        <View style={styles.footer}>
+          <Text style={styles.footerText}>
+            Al continuar, aceptas nuestros Términos y Condiciones.
+          </Text>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
-export default Page;
+export default LoginPage;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    padding: 26,
+    paddingTop: 15,
   },
-
-  seperatorView: {
-    flexDirection: 'row',
-    gap: 10,
+  scroll: {
+    paddingHorizontal: 24,
+    // paddingVertical: 40,
+    flexGrow: 1,
+    justifyContent: 'space-between',
+  },
+  header: {
     alignItems: 'center',
-    marginVertical: 30,
+    marginBottom: 40,
   },
-  seperator: {
-    fontFamily: 'mon-sb',
-    color: '#ABABAB',
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 20,
+  },
+  title: {
+    fontFamily: 'mon-b',
+    fontSize: 28,
+    color: Colors.dark,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontFamily: 'mon',
     fontSize: 16,
+    color: Colors.grey,
+    textAlign: 'center',
+    paddingHorizontal: 20,
+  },
+  buttonContainer: {
+    gap: 20,
   },
   btnOutline: {
     backgroundColor: '#fff',
@@ -130,5 +148,17 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 16,
     fontFamily: 'mon-sb',
+    marginLeft: 10,
+  },
+  footer: {
+    alignItems: 'center',
+    marginTop: 40,
+  },
+  footerText: {
+    fontFamily: 'mon',
+    fontSize: 12,
+    color: Colors.grey,
+    textAlign: 'center',
   },
 });
+

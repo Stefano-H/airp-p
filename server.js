@@ -728,23 +728,26 @@ app.post('/api/getOwnerStatus', async (req, res) => {
   }
 });
 
-// server.js (corregido)
-app.post('/api/updateUserDocuments', async (req, res) => {
-  const { clerk_id, documentopersonal_adelante, documentopersonal_detras, documentodomicilio } = req.body;
 
-  if (!clerk_id || !documentopersonal_adelante || !documentopersonal_detras || !documentodomicilio) {
+app.post('/api/updateUserDocuments', async (req, res) => {
+  const { clerk_id, documentopersonal_adelante, documentopersonal_detras, documentodomicilio, fotocara } = req.body;
+
+  console.log('Datos recibidos en /api/updateUserDocuments:', req.body);
+
+  if (!clerk_id || !documentopersonal_adelante || !documentopersonal_detras || !documentodomicilio || !fotocara) {
     return res.status(400).json({ error: 'Faltan documentos requeridos' });
   }
 
   try {
     const [result] = await pool.query(
       `UPDATE usuarios 
-      SET documentopersonaladelante = ?, 
-          documentopersonaldetras = ?,
-          documentodomicilio = ?,
-          revision = 1 
-      WHERE clerk_id = ?`,
-      [documentopersonal_adelante, documentopersonal_detras, documentodomicilio, clerk_id]
+       SET documentopersonaladelante = ?, 
+           documentopersonaldetras = ?,
+           documentodomicilio = ?,
+           fotocara = ?,
+           revision = 1 
+       WHERE clerk_id = ?`,
+      [documentopersonal_adelante, documentopersonal_detras, documentodomicilio, fotocara, clerk_id]
     );
 
     if (result.affectedRows === 0) {
@@ -757,6 +760,7 @@ app.post('/api/updateUserDocuments', async (req, res) => {
     res.status(500).json({ error: 'Error al guardar la documentación' });
   }
 });
+
 
 
 // Iniciar el servidor

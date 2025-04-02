@@ -76,14 +76,13 @@ export default function DomicilioVerification() {
 const handleFinalizar = async () => {
     try {
       // 1. Validar datos
-      if (
-        !formData.verificacion_identidad || 
-        !formData.verificacion_domicilio
-      ) {
-        Alert.alert('Error', 'Sube ambas imágenes primero.');
-        console.log('verificacion_identidad:', formData.verificacion_identidad.photos); 
-        console.log('️verificacion_domicilio:', formData.verificacion_domicilio.photos); 
-        return;
+         if (
+            !formData.verificacion_identidad || 
+            !formData.verificacion_cara ||
+            !formData.verificacion_domicilio
+          ) {
+            Alert.alert('Error', 'Sube la identificación, la foto de tu cara (con DNI y papel con la fecha) y el comprobante de domicilio.');
+          return;
       }
   
       // 2. Obtener user.id (Asegúrate de tener acceso al usuario aquí)
@@ -102,6 +101,7 @@ const handleFinalizar = async () => {
             documentopersonal_adelante: formData.verificacion_identidad.adelante,
             documentopersonal_detras: formData.verificacion_identidad.detras,
             documentodomicilio: formData.verificacion_domicilio.photos[0],
+            fotocara: formData.verificacion_cara.photo
         }),
       });
   
