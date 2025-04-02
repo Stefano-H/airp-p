@@ -10,4 +10,9 @@ export default {
   green: '#5fcf30',
   blueclear: '#2f95dc',
   red: '#ff385c',
+  lightPrimary: '#E6F0FF',
+  lightGreen: '#E6F7ED',
+  error: '#FF3B30',
+  lightError: '#FFEBEA',
+  lightGrey: '#F5F5F5',
 };

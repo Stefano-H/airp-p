@@ -21,7 +21,7 @@ import {
         <ScrollView contentContainerStyle={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, gap: 24 }}>
             <Stack.Screen
                 options={{
-                title: '',
+                title: 'Seguridad',
                 headerTitleStyle: {
                     fontFamily: 'mon-b',
                     fontSize: 20,
@@ -29,7 +29,6 @@ import {
                 },
                 }}
             />
-          <Text style={styles.headerTitle}>Seguridad</Text>
   
           <TouchableOpacity style={styles.securityItem}>
             <Text style={styles.securityTitle}>Configura la autenticación en 2 pasos</Text>

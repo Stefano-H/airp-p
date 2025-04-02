@@ -9,142 +9,124 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
-import { useUser } from '@clerk/clerk-expo';
 
 const Payments = () => {
-  const { user } = useUser();
-  const isHost = true; // Cambiar a false para ver la vista de usuario
-
-  // Datos de ejemplo para usuarios
-  const userPayments = [
+  // Datos actualizados con depósitos retornados
+  const payments = [
     {
-      id: '1',
-      date: '15 Mar 2024',
-      amount: '€1,200',
-      description: 'Reserva Fiesta de Cumpleaños',
-      status: 'Pagado',
-      method: 'Visa •••• 1234'
+      id: 'VL-0424',
+      date: '15 Abr 2024',
+      amount: '€2,850',
+      description: 'Alquiler completo - Temporada alta',
+      status: 'Disponible 20/Abr',
+      earnings: '€2,565',
+      fees: '€285 (10%)',
+      property: 'Villa Los Olivos (Marbella)',
+      type: 'ingreso'
     },
     {
-      id: '2',
-      date: '12 Mar 2024',
-      amount: '€850',
-      description: 'Depósito de Seguridad',
-      status: 'Reembolsado',
-      method: 'Mastercard •••• 5678'
+      id: 'AP-0325',
+      date: '10 Abr 2024',
+      amount: '-€600',
+      description: 'Devolución depósito seguridad',
+      status: 'Procesado 12/Abr',
+      earnings: '-€600',
+      fees: '€0',
+      property: 'Ático Panorámico (Barcelona)',
+      type: 'devolucion'
+    },
+    {
+      id: 'CR-0318',
+      date: '05 Abr 2024',
+      amount: '€1,980',
+      description: 'Alquiler fin de semana',
+      status: 'Retirado 08/Abr',
+      earnings: '€1,782',
+      fees: '€198 (10%)',
+      property: 'Casa Rural La Vega (Girona)',
+      type: 'ingreso'
     }
   ];
 
-  // Datos específicos para propietarios
-  const hostPayments = [
-    {
-      id: 'H1',
-      date: '20 Mar 2024',
-      amount: '€2,450',
-      description: 'Evento Corporativo XYZ',
-      status: 'Disponible 15/Abr',
-      earnings: '€2,150',
-      fees: '€300'
-    },
-    {
-      id: 'H2',
-      date: '5 Mar 2024',
-      amount: '€1,800',
-      description: 'Boda en Jardín',
-      status: 'Retirado 10/Mar',
-      earnings: '€1,600',
-      fees: '€200'
-    }
-  ];
+  const availableBalance = '€4,615';
+  const nextPayoutDate = '20 de Abril 2024';
+  const mainAccount = 'BBVA •••• 3456';
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.lightGrey }}>
       <ScrollView contentContainerStyle={styles.container}>
         <Stack.Screen
           options={{
-            title: '',
-            headerTitleStyle: styles.headerTitleStyle,
+            title: 'Tus Ingresos',
+            headerTitleStyle: styles.headerTitle
           }}
         />
-        
-        <View style={styles.header}>
-          <Text style={styles.title}>
-            {isHost ? 'Gestión de Ingresos' : 'Historial de Pagos'}
-          </Text>
-          {isHost && (
-            <TouchableOpacity style={styles.filterButton}>
-              <Ionicons name="cash-outline" size={24} color={Colors.primary} />
-            </TouchableOpacity>
-          )}
-        </View>
 
-        {isHost && (
-          <View style={styles.summaryCard}>
-            <Text style={styles.summaryTitle}>Saldo Disponible</Text>
-            <Text style={styles.summaryAmount}>€4,750</Text>
-            
-            <View style={styles.withdrawalInfo}>
-              <Ionicons name="calendar" size={18} color={Colors.primary} />
-              <Text style={styles.withdrawalText}>
-                Próxima fecha de retiro: 5 de Abril
+        <View style={styles.summaryCard}>
+          <Text style={styles.summaryTitle}>Saldo Disponible</Text>
+          <Text style={styles.summaryAmount}>{availableBalance}</Text>
+          
+          <View style={styles.infoRow}>
+            <Ionicons name="calendar" size={16} color={Colors.primary} />
+            <Text style={styles.infoText}>
+              Próximo retiro: {nextPayoutDate}
+            </Text>
+          </View>
+          
+          <View style={styles.infoRow}>
+            <Ionicons name="card" size={16} color={Colors.primary} />
+            <Text style={styles.infoText}>
+              Cuenta principal: {mainAccount}
+            </Text>
+          </View>
+          
+          <TouchableOpacity style={styles.withdrawButton}>
+            <Text style={styles.withdrawButtonText}>Solicitar Retiro</Text>
+          </TouchableOpacity>
+        </View>
+        
+        <Text style={styles.sectionTitle}>Movimientos Recientes</Text>
+        
+        {payments.map((payment) => (
+          <View key={payment.id} style={[
+            styles.paymentCard,
+            payment.type === 'devolucion' && styles.refundCard
+          ]}>
+            <View style={styles.paymentHeader}>
+              <Text style={styles.propertyName}>{payment.property}</Text>
+              <Text style={[
+                styles.paymentAmount,
+                payment.type === 'devolucion' && styles.refundAmount
+              ]}>
+                {payment.amount}
               </Text>
             </View>
             
-            <TouchableOpacity style={styles.withdrawButton}>
-              <Text style={styles.withdrawButtonText}>Solicitar Retiro</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-
-        <Text style={styles.sectionTitle}>
-          {isHost ? 'Eventos Recientes' : 'Tus Transacciones'}
-        </Text>
-        
-        {(isHost ? hostPayments : userPayments).map((payment) => (
-          <View key={payment.id} style={styles.paymentCard}>
-            <View style={styles.paymentIcon}>
-              <Ionicons 
-                name={isHost ? 'business' : 'card'} 
-                size={28} 
-                color={Colors.primary} 
-              />
-            </View>
+            <Text style={styles.paymentDescription}>{payment.description}</Text>
             
-            <View style={styles.paymentInfo}>
-              <Text style={styles.paymentDescription}>{payment.description}</Text>
+            <View style={styles.paymentDetails}>
               <Text style={styles.paymentDate}>{payment.date}</Text>
-              {!isHost && (
-                <Text style={styles.paymentMethod}>{payment.method}</Text>
-              )}
-            </View>
-            
-            <View style={styles.paymentAmountContainer}>
-              <Text style={styles.paymentAmount}>{payment.amount}</Text>
               <View style={[
                 styles.statusBadge,
-                { 
-                  backgroundColor: payment.status.includes('Disponible') 
-                    ? Colors.lightPrimary 
-                    : Colors.lightGrey 
-                }
+                payment.type === 'devolucion' ? styles.refundStatus : 
+                payment.status.includes('Disponible') ? styles.availableStatus :
+                styles.withdrawnStatus
               ]}>
                 <Text style={[
                   styles.statusText,
-                  { color: payment.status.includes('Disponible') 
-                    ? Colors.primary 
-                    : Colors.dark 
-                  }
+                  payment.type === 'devolucion' && styles.refundStatusText
                 ]}>
                   {payment.status}
                 </Text>
               </View>
-              {isHost && (
-                <View style={styles.breakdown}>
-                  <Text style={styles.breakdownText}>Líquido: {payment.earnings}</Text>
-                  <Text style={styles.breakdownText}>Comisiones: {payment.fees}</Text>
-                </View>
-              )}
             </View>
+            
+            {payment.type === 'ingreso' && (
+              <View style={styles.breakdown}>
+                <Text style={styles.breakdownText}>Líquido: {payment.earnings}</Text>
+                <Text style={styles.breakdownText}>Comisión: {payment.fees}</Text>
+              </View>
+            )}
           </View>
         ))}
       </ScrollView>
@@ -154,157 +136,147 @@ const Payments = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 24,
-    gap: 24,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  title: {
-    fontFamily: 'mon-b',
-    fontSize: 28,
-    color: Colors.dark,
-  },
-  filterButton: {
-    padding: 8,
-    borderRadius: 8,
-    backgroundColor: Colors.lightPrimary,
-  },
-  summaryCard: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: Colors.dark,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 2,
-  },
-  summaryTitle: {
-    fontFamily: 'mon',
-    fontSize: 16,
-    color: Colors.grey,
-    marginBottom: 8,
-  },
-  summaryAmount: {
-    fontFamily: 'mon-b',
-    fontSize: 32,
-    color: Colors.dark,
-    marginBottom: 16,
-  },
-  summaryRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  summaryItem: {
-    alignItems: 'center',
-  },
-  summaryLabel: {
-    fontFamily: 'mon',
-    fontSize: 14,
-    color: Colors.grey,
-  },
-  summaryValue: {
-    fontFamily: 'mon-b',
-    fontSize: 18,
+    padding: 16,
+    gap: 16,
   },
   sectionTitle: {
     fontFamily: 'mon-b',
     fontSize: 20,
     color: Colors.dark,
-    marginTop: 8,
+    marginBottom: 16,
   },
   paymentCard: {
     backgroundColor: '#fff',
     borderRadius: 12,
     padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 4,
+    marginBottom: 8,
     shadowColor: Colors.grey,
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 1,
   },
-  paymentIcon: {
-    marginRight: 16,
+  refundCard: {
+    borderLeftWidth: 4,
+    borderLeftColor: Colors.error,
   },
-  paymentInfo: {
-    flex: 1,
+  paymentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
   },
-  paymentDescription: {
+  propertyName: {
     fontFamily: 'mon-sb',
     fontSize: 16,
     color: Colors.dark,
-    marginBottom: 4,
+    flex: 1,
+    marginRight: 8,
+  },
+  paymentAmount: {
+    fontFamily: 'mon-b',
+    fontSize: 16,
+    color: Colors.dark,
+  },
+  refundAmount: {
+    color: Colors.error,
+  },
+  paymentDescription: {
+    fontFamily: 'mon',
+    fontSize: 14,
+    color: Colors.grey,
+    marginBottom: 8,
+  },
+  paymentDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   paymentDate: {
     fontFamily: 'mon',
     fontSize: 14,
     color: Colors.grey,
   },
-  paymentAmountContainer: {
-    alignItems: 'flex-end',
-  },
-  paymentAmount: {
-    fontFamily: 'mon-b',
-    fontSize: 16,
-    marginBottom: 4,
-  },
   statusBadge: {
     borderRadius: 6,
-    paddingHorizontal: 8,
+    paddingHorizontal: 10,
     paddingVertical: 4,
+  },
+  availableStatus: {
+    backgroundColor: Colors.lightPrimary,
+  },
+  withdrawnStatus: {
+    backgroundColor: Colors.lightGreen,
+  },
+  refundStatus: {
+    backgroundColor: Colors.lightError,
   },
   statusText: {
     fontFamily: 'mon-sb',
     fontSize: 12,
   },
-  headerTitleStyle: {
+  refundStatusText: {
+    color: Colors.error,
+  },
+  breakdown: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.lightGrey,
+  },
+  breakdownText: {
+    fontFamily: 'mon',
+    fontSize: 14,
+    color: Colors.dark,
+  },
+  headerTitle: {
     fontFamily: 'mon-b',
     fontSize: 20,
-    marginTop: 20,
   },
-  withdrawalInfo: {
+  summaryCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: Colors.dark,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 1,
+    marginBottom: 12,
+  },
+  summaryTitle: {
+    fontFamily: 'mon',
+    fontSize: 14,
+    color: Colors.grey,
+    marginBottom: 6,
+  },
+  summaryAmount: {
+    fontFamily: 'mon-b',
+    fontSize: 26,
+    color: Colors.dark,
+    marginBottom: 12,
+  },
+  infoRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginVertical: 12,
+    marginVertical: 4,
   },
-  withdrawalText: {
+  infoText: {
     fontFamily: 'mon',
-    color: Colors.grey,
-    fontSize: 14,
+    fontSize: 13,
+    color: Colors.dark,
   },
   withdrawButton: {
     backgroundColor: Colors.primary,
     borderRadius: 8,
     padding: 12,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 12,
   },
   withdrawButtonText: {
     color: '#fff',
     fontFamily: 'mon-b',
     fontSize: 16,
-  },
-  paymentMethod: {
-    fontFamily: 'mon',
-    color: Colors.grey,
-    fontSize: 14,
-    marginTop: 4,
-  },
-  breakdown: {
-    marginTop: 8,
-  },
-  breakdownText: {
-    fontFamily: 'mon',
-    fontSize: 12,
-    color: Colors.grey,
   },
 });
 

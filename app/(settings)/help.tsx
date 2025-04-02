@@ -71,6 +71,32 @@ const Ayuda = () => {
             Para reservar una propiedad, simplemente selecciona la propiedad que deseas reservar, haz clic en "Solicitar Reserva" y sigue todos los pasos que se te indican para pagar y completar la reserva.
           </Text>
         </View>
+        <View style={styles.faqItem}>
+          <Text style={styles.faqQuestion}>¿Qué información muestra cada pago?</Text>
+          <Text style={styles.faqAnswer}>
+            Cada movimiento incluye: 1) Nombre de la propiedad, 2) Tipo de transacción, 3) Fechas clave, 4) Monto bruto/neto, 5) Comisiones, 6) Estado del dinero, y 7) Cuenta bancaria afectada.
+          </Text>
+        </View>
+
+        <View style={styles.faqItem}>
+          <Text style={styles.faqQuestion}>¿Cómo sé cuánto gané realmente por un alquiler?</Text>
+          <Text style={styles.faqAnswer}>
+            Busca el campo "Líquido" que muestra tu ganancia después de comisiones. Por ejemplo, si cobraste €1,000 con 10% de comisión, verás: "Líquido: €900" y "Comisión: €100 (10%)".
+          </Text>
+        </View>
+
+        <View style={styles.faqItem}>
+          <Text style={styles.faqQuestion}>¿Puedo ver el historial completo de una propiedad?</Text>
+          <Text style={styles.faqAnswer}>
+            Sí, al tocar el nombre de cualquier propiedad en el historial, verás todos sus movimientos ordenados por fecha, incluyendo alquileres, depósitos y devoluciones.
+          </Text>
+        </View>
+        <View style={styles.faqItem}>
+          <Text style={styles.faqQuestion}>¿Qué significa "Depósito retornado" en mi historial?</Text>
+          <Text style={styles.faqAnswer}>
+            Es la devolución del depósito de seguridad que cobraste al inquilino al inicio. Aparece en negativo (ej: -€600) porque es dinero que sale de tu cuenta cuando lo devuelves al finalizar el alquiler si no hay daños.
+          </Text>
+        </View>
       </View>
     );
   };
@@ -112,7 +138,6 @@ const Ayuda = () => {
             headerTitleStyle: {
               fontFamily: 'mon-b',
               fontSize: 20,
-              marginTop: 20,
             },
           }}
         />

@@ -22,25 +22,20 @@ const PersonalInfo = () => {
   const [verificationCode, setVerificationCode] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [emailObj, setEmailObj] = useState<any>(null);
-  const [address, setAddress] = useState(''); // Estado para Dirección
-  const [phone, setPhone] = useState('');     // Estado para Teléfono
+  const [address, setAddress] = useState(''); 
+  const [phone, setPhone] = useState('');    
   const [alertVisible, setAlertVisible] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
-
 
   useEffect(() => {
     if (user) {
       setFirstName(user.firstName || '');
       setLastName(user.lastName || '');
       setEmail(user.emailAddresses?.[0]?.emailAddress || '');
-      // Si tuvieras valores previos de dirección o teléfono, los inicializas aquí.
-      // setAddress(user.address || '');
-      // setPhone(user.phone || '');
     }
   }, [user]);
 
-  // Modifica el useEffect para capturar la respuesta en texto plano:
   useEffect(() => {
     const loadUserData = async () => {
       if (!user?.id) return;
@@ -48,7 +43,6 @@ const PersonalInfo = () => {
       try {
         const response = await fetch(`${API_BASE_URL}/api/get-user?clerkId=${user.id}`);
         
-        // Verifica si la respuesta es exitosa
         if (!response.ok) {
           const errorText = await response.text();
           throw new Error(`Error ${response.status}: ${errorText}`);
@@ -67,59 +61,53 @@ const PersonalInfo = () => {
     loadUserData();
   }, [user]);
 
-// Función para guardar todos los cambios en un único botón
-const handleUpdateUser = async () => {
-  if (!user) return;
+  const handleUpdateUser = async () => {
+    if (!user) return;
 
-  // 1. Actualizar nombre en Clerk
-  try {
-    await user.update({ firstName, lastName });
-  } catch (error: any) {
-    console.error('Error actualizando nombre:', error);
-    alert('Error actualizando nombre');
-    return;
-  }
+    try {
+      await user.update({ firstName, lastName });
+    } catch (error: any) {
+      console.error('Error actualizando nombre:', error);
+      alert('Error actualizando nombre');
+      return;
+    }
 
-  // 2. Actualizar datos en tu backend
-  const payload = {
-    clerkId: user.id,
-    fullName: `${firstName} ${lastName}`,
-    email,
-    direccion: address,
-    telefono: phone,
-  };
+    const payload = {
+      clerkId: user.id,
+      fullName: `${firstName} ${lastName}`,
+      email,
+      direccion: address,
+      telefono: phone,
+    };
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/update-user`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/update-user`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
 
-    if (response.ok) {
-      // Actualización exitosa
-      setAlertTitle('¡Éxito!');
-      setAlertMessage('Tus datos se han actualizado correctamente.');
-      setAlertVisible(true);
-      
-      // Recargar datos
-      const refreshResponse = await fetch(`${API_BASE_URL}/api/get-user?clerkId=${user.id}`);
-      const refreshData = await refreshResponse.json();
-      setAddress(refreshData.dirección || '');
-      setPhone(refreshData.telefono || '');
-      
-    } else {
-      setAlertTitle('Error');
-      setAlertMessage('No se pudo guardar la información. Inténtalo de nuevo.');
+      if (response.ok) {
+        setAlertTitle('¡Éxito!');
+        setAlertMessage('Tus datos se han actualizado correctamente.');
+        setAlertVisible(true);
+        
+        const refreshResponse = await fetch(`${API_BASE_URL}/api/get-user?clerkId=${user.id}`);
+        const refreshData = await refreshResponse.json();
+        setAddress(refreshData.dirección || '');
+        setPhone(refreshData.telefono || '');
+        
+      } else {
+        setAlertTitle('Error');
+        setAlertMessage('No se pudo guardar la información. Inténtalo de nuevo.');
+        setAlertVisible(true);
+      }
+    } catch (error) {
+      setAlertTitle('Error crítico');
+      setAlertMessage(typeof error === 'string' ? error : 'Ocurrió un error inesperado');
       setAlertVisible(true);
     }
-  } catch (error) {
-    setAlertTitle('Error crítico');
-    setAlertMessage(typeof error === 'string' ? error : 'Ocurrió un error inesperado');
-    setAlertVisible(true);
-  }
-};
-
+  };
 
   const handleVerify = async () => {
     try {
@@ -140,9 +128,16 @@ const handleUpdateUser = async () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
-      <ScrollView contentContainerStyle={{ paddingLeft: 24, paddingRight: 24, paddingBottom: 24, gap: 24 }}>
-        <Stack.Screen options={{ title: '', headerTitleStyle: { fontFamily: 'mon-b', fontSize: 20, marginTop: 20 } }} />
-        <Text style={styles.headerTitle}>Información personal</Text>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Stack.Screen
+          options={{
+            title: 'Información personal',
+            headerTitleStyle: {
+              fontFamily: 'mon-b',
+              fontSize: 20,
+            },
+          }}
+        />
 
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>Nombre completo</Text>
@@ -190,7 +185,6 @@ const handleUpdateUser = async () => {
           <Text style={styles.buttonText}>Guardar cambios</Text>
         </TouchableOpacity>
 
-
         {isVerifying && (
           <View style={styles.section}>
             <Text style={styles.sectionLabel}>Verificar Código</Text>
@@ -211,19 +205,30 @@ const handleUpdateUser = async () => {
           message={alertMessage}
           onClose={() => setAlertVisible(false)}
         />
-
       </ScrollView>
     </SafeAreaView>
   );
 };
 
-
-
 const styles = StyleSheet.create({
-  headerTitle: { fontFamily: 'mon-b', fontSize: 24, color: Colors.dark },
-  section: { gap: 8 },
-  sectionLabel: { fontFamily: 'mon-sb', fontSize: 16, color: Colors.dark },
-  linkText: { fontFamily: 'mon', color: Colors.primary, fontSize: 16 },
+  container: { 
+    paddingLeft: 24,
+    paddingRight: 24,
+    gap: 24 
+  },
+  section: { 
+    gap: 8 
+  },
+  sectionLabel: { 
+    fontFamily: 'mon-sb', 
+    fontSize: 16, 
+    color: Colors.dark 
+  },
+  linkText: { 
+    fontFamily: 'mon', 
+    color: Colors.primary, 
+    fontSize: 16 
+  },
   input: { 
     fontFamily: 'mon', 
     fontSize: 16, 
@@ -234,7 +239,7 @@ const styles = StyleSheet.create({
     padding: 10 
   },
   button: {
-    backgroundColor: Colors.primary, // Color del botón
+    backgroundColor: Colors.primary, 
     paddingVertical: 12, 
     paddingHorizontal: 24, 
     borderRadius: 8, 
@@ -244,10 +249,9 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontFamily: 'mon-sb',
-    color: '#fff', // Texto en color blanco para contraste
+    color: '#fff', 
     fontSize: 16,
   },
 });
-
 
 export default PersonalInfo;
