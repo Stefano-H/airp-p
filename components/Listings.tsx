@@ -79,7 +79,7 @@ const Listings = ({ listings: items, category }: Props) => {
 
           <View style={styles.priceContainer}>
             <Text style={styles.price}>€{item.precio}</Text>
-            <Text style={styles.priceText}> / noche</Text>
+            <Text style={styles.priceText}> / noches</Text>
           </View>
         </Animated.View>
       </TouchableOpacity>
@@ -142,10 +142,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   listingTitle: {
-    fontSize: 18,
-    fontWeight: '600',
     color: '#333',
     flex: 1,
+    fontSize: 16, fontWeight: 'bold', maxWidth: '85%'
   },
   ratingContainer: {
     flexDirection: 'row',
@@ -155,11 +154,13 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     fontSize: 14,
     color: '#777',
+    fontFamily: 'mon-sb',
   },
   roomType: {
     fontSize: 14,
     color: '#777',
     marginBottom: 8,
+    fontFamily: 'mon',
   },
   priceContainer: {
     flexDirection: 'row',
@@ -168,11 +169,11 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#007AFF',
+    color: '#000',
   },
   priceText: {
     fontSize: 14,
-    color: '#777',
+    color: '#000',
   },
   messageContainer: {
     position: 'absolute',

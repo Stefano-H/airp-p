@@ -118,7 +118,9 @@ useFocusEffect(
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.headerContainer}>
           <Text style={styles.header}>Perfil</Text>
-          {isSignedIn && <Ionicons name="notifications-outline" size={26} />}
+          <TouchableOpacity onPress={() => router.push('/(settings)/help')}>
+            {isSignedIn && <Ionicons name="help-circle-outline" size={26} />}
+          </TouchableOpacity>
         </View>
 
         {isSignedIn && user ? (

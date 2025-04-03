@@ -189,12 +189,6 @@ export default function Paso1_2() {
         onChangeText={value => handleInputChange('provincia', value)}
       />
 
-      <View style={styles.switchContainer}>
-        <Text style={styles.label}>Mostrar tu ubicación exacta</Text>
-        <Switch value={exactLocation} onValueChange={setExactLocation} />
-      </View>
-      <Text style={styles.infoText}>Indica claramente a los huéspedes dónde se encuentra tu alojamiento. Solo les facilitaremos tu dirección cuando su reserva esté confirmada.</Text>
-
       <TouchableOpacity
         style={[styles.nextButton, !isFormValid && styles.disabledButton]}
         disabled={!isFormValid}

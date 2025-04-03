@@ -96,7 +96,7 @@ export default function App() {
         <View style={styles.step}>
           <Text style={styles.stepTitle}>2. Haz que destaque</Text>
           <Text style={styles.stepDescription}>
-            Añade al menos cinco fotos, un título y una descripción. Te echaremos una mano.
+            Añade al menos tres fotos, un título y una descripción. Te echaremos una mano.
           </Text>
         </View>
 
