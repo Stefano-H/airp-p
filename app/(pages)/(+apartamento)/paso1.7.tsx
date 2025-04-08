@@ -101,7 +101,7 @@ export default function Paso1_7() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Stack.Screen options={{
-        title: 'Paso 1.7',
+        title: 'Paso 7',
         headerTitleStyle: { fontFamily: 'mon-b', fontSize: 24, marginTop: 20 },
       }} />
 

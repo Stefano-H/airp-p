@@ -66,7 +66,7 @@ ROW_FORMAT = DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS `AlquilaTuEvento`.`reglas` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `no_smoking` TINYINT(1) DEFAULT '0',
+  `no_fumar` TINYINT(1) DEFAULT '0',
   `no_fiestas` TINYINT(1) DEFAULT '0',
   `horas_de_silencio` TINYINT(1) DEFAULT '0',
   `no_mascotas` TINYINT(1) DEFAULT '0',
@@ -167,7 +167,7 @@ INSERT INTO `AlquilaTuEvento`.`categorias` (`id`, `Todas`, `Bodas`, `Fiestas`, `
 
 INSERT INTO `AlquilaTuEvento`.`direccion` (`id`, `distrito`, `ciudad`, `país`, `dirección`, `puerta`, `codigo_postal`) VALUES ('1', 'Sant Joan Despi', 'Barcelona', 'España', ' ', ' ', '08001');
 
-INSERT INTO `AlquilaTuEvento`.`reglas` (`id`, `no_smoking`, `no_fiestas`, `horas_de_silencio`, `no_mascotas`, `estrictos_en_el_check_in`, `estrictos_en_el_check_out`, `maximos_invitados_permitidos`, `respectar_las_reglas_de_la_comunidad`, `no_mover_los_muebles`, `limpieza_basica`, `areas_restringidas`) VALUES ('1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1');
+INSERT INTO `AlquilaTuEvento`.`reglas` (`id`, `no_fumar`, `no_fiestas`, `horas_de_silencio`, `no_mascotas`, `estrictos_en_el_check_in`, `estrictos_en_el_check_out`, `maximos_invitados_permitidos`, `respectar_las_reglas_de_la_comunidad`, `no_mover_los_muebles`, `limpieza_basica`, `areas_restringidas`) VALUES ('1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1');
 
 INSERT INTO `AlquilaTuEvento`.`servicios` (`id`, `wifi`, `aire_acondicionado`, `calefacción`, `lavadora`, `plancha`, `toallas`, `detector_de_humo`, `detector_de_monoxido_de_carbono`) VALUES ('1', '1', '1', '1', '1', '1', '1', '1', '1');
 
@@ -182,7 +182,7 @@ INSERT INTO `AlquilaTuEvento`.`categorias` (`id`, `Todas`, `Bodas`, `Fiestas`, `
 
 INSERT INTO `AlquilaTuEvento`.`direccion` (`id`, `distrito`, `ciudad`, `país`, `dirección`, `puerta`, `codigo_postal`)  VALUES ('2', 'Sant Boi', 'Barcelona', 'España', ' ', ' ', '08001');
 
-INSERT INTO `AlquilaTuEvento`.`reglas` (`id`, `no_smoking`, `no_fiestas`, `horas_de_silencio`, `no_mascotas`, `estrictos_en_el_check_in`, `estrictos_en_el_check_out`, `maximos_invitados_permitidos`, `respectar_las_reglas_de_la_comunidad`, `no_mover_los_muebles`, `limpieza_basica`, `areas_restringidas`) VALUES ('2', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1');
+INSERT INTO `AlquilaTuEvento`.`reglas` (`id`, `no_fumar`, `no_fiestas`, `horas_de_silencio`, `no_mascotas`, `estrictos_en_el_check_in`, `estrictos_en_el_check_out`, `maximos_invitados_permitidos`, `respectar_las_reglas_de_la_comunidad`, `no_mover_los_muebles`, `limpieza_basica`, `areas_restringidas`) VALUES ('2', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1', '1');
 
 INSERT INTO `AlquilaTuEvento`.`servicios` (`id`, `wifi`, `aire_acondicionado`, `calefacción`, `lavadora`, `plancha`, `toallas`, `detector_de_humo`, `detector_de_monoxido_de_carbono`) VALUES ('2', '1', '1', '1', '1', '1', '1', '1', '1');
 
@@ -199,7 +199,7 @@ INSERT INTO `AlquilaTuEvento`.`categorias` (`id`, `Todas`, `Bodas`, `Fiestas`, `
 INSERT INTO `AlquilaTuEvento`.`direccion` (`id`, `distrito`, `ciudad`, `país`, `dirección`, `puerta`, `codigo_postal`) VALUES 
 ('3', 'Tulum', 'Quintana Roo', 'México', ' ', ' ', '77760');
 
-INSERT INTO `AlquilaTuEvento`.`reglas` (`id`, `no_smoking`, `no_fiestas`, `horas_de_silencio`, `no_mascotas`, `estrictos_en_el_check_in`, `estrictos_en_el_check_out`, `maximos_invitados_permitidos`, `respectar_las_reglas_de_la_comunidad`, `no_mover_los_muebles`, `limpieza_basica`, `areas_restringidas`) VALUES 
+INSERT INTO `AlquilaTuEvento`.`reglas` (`id`, `no_fumar`, `no_fiestas`, `horas_de_silencio`, `no_mascotas`, `estrictos_en_el_check_in`, `estrictos_en_el_check_out`, `maximos_invitados_permitidos`, `respectar_las_reglas_de_la_comunidad`, `no_mover_los_muebles`, `limpieza_basica`, `areas_restringidas`) VALUES 
 ('3', '1', '0', '1', '0', '1', '1', '1', '1', '1', '0', '1');
 
 INSERT INTO `AlquilaTuEvento`.`servicios` (`id`, `wifi`, `aire_acondicionado`, `calefacción`, `lavadora`, `plancha`, `toallas`, `detector_de_humo`, `detector_de_monoxido_de_carbono`) VALUES 

@@ -111,7 +111,7 @@ export default function Paso1_2() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Stack.Screen options={{
-        title: 'Paso 1.2',
+        title: 'Paso 2',
         headerTitleStyle: styles.headerTitle,
       }} />
       {/* Título y subtítulo */}

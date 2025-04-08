@@ -565,11 +565,11 @@ app.post('/create-listing', async (req, res) => {
     // 4. Insertar en la tabla reglas
     const reglas = paso1_5 || {};
     const queryReglas = `
-      INSERT INTO reglas (no_smoking, no_fiestas, horas_de_silencio, no_mascotas, estrictos_en_el_check_in, estrictos_en_el_check_out, maximos_invitados_permitidos, respectar_las_reglas_de_la_comunidad, no_mover_los_muebles, limpieza_basica, areas_restringidas)
+      INSERT INTO reglas (no_fumar, no_fiestas, horas_de_silencio, no_mascotas, estrictos_en_el_check_in, estrictos_en_el_check_out, maximos_invitados_permitidos, respectar_las_reglas_de_la_comunidad, no_mover_los_muebles, limpieza_basica, areas_restringidas)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const reglasValues = [
-      reglas.no_smoking ? 1 : 0,
+      reglas.no_fumar ? 1 : 0,
       reglas.no_fiestas ? 1 : 0,
       reglas.horas_de_silencio ? 1 : 0,
       reglas.no_mascotas ? 1 : 0,

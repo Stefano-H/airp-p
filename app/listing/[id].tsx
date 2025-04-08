@@ -161,7 +161,7 @@ const Page = () => {
     }
 
     const ruleIcons = {
-        no_smoking: 'color-wand-outline',
+        no_fumar: 'color-wand-outline',
         no_parties: 'ban',
         quiet_hours: 'volume-mute',
         no_pets: 'paw',
@@ -339,9 +339,9 @@ const Page = () => {
                         <View style={styles.divider} />
                         <Text style={styles.sectionTitle}>Reglas de la Casa</Text>
                         <View style={styles.infoSection2}>
-                            {listing.no_smoking === 1 && (
+                            {listing.no_fumar === 1 && (
                                 <View style={styles.ruleItem}>
-                                    <Ionicons name={ruleIcons.no_smoking} size={24} color={Colors.grey} />
+                                    <Ionicons name={ruleIcons.no_fumar} size={24} color={Colors.grey} />
                                     <Text style={styles.ruleText}>Prohibido fumar</Text>
                                 </View>
                             )}

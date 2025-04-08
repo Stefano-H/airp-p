@@ -9,7 +9,7 @@ export default function Paso1_5() {
   // Mapeo de reglas para mostrar texto legible y emojis
 
   const reglasLegibles = {
-    no_smoking: { label: "No fumar", icon: <MaterialIcons name="smoke-free" size={24} color="black" /> },
+    no_fumar: { label: "No fumar", icon: <MaterialIcons name="smoke-free" size={24} color="black" /> },
     no_fiestas: { label: "No fiestas", icon: <FontAwesome5 name="glass-cheers" size={24} color="black" /> },
     horas_de_silencio: { label: "Horas de silencio", icon: <MaterialIcons name="volume-off" size={24} color="black" /> },
     no_mascotas: { label: "No mascotas", icon: <MaterialIcons name="pets" size={24} color="black" /> },
@@ -23,7 +23,7 @@ export default function Paso1_5() {
   };
   
   const [reglas, setReglas] = useState({
-    no_smoking: false,
+    no_fumar: false,
     no_fiestas: false,
     horas_de_silencio: false,
     no_mascotas: false,
@@ -61,7 +61,7 @@ export default function Paso1_5() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Stack.Screen options={{
-        title: 'Paso 1.5',
+        title: 'Paso 5',
         headerTitleStyle: { fontFamily: 'mon-b', fontSize: 24, marginTop: 20 },
       }} />
 
