@@ -128,6 +128,11 @@ CREATE TABLE IF NOT EXISTS `AlquilaTuEvento`.`ordenes` (
   `telefono` VARCHAR(20) NOT NULL,
   `notas_adicionales` TEXT DEFAULT NULL,
   `confirmado` TINYINT(1) NOT NULL DEFAULT '0',
+  `monto_total` DECIMAL(10,2) NOT NULL,
+  `moneda` VARCHAR(3) DEFAULT 'EUR',
+  `stripe_payment_id` VARCHAR(255),
+  `estado_pago` ENUM('pendiente', 'completado', 'fallido') DEFAULT 'pendiente',
+  `metodo_pago` VARCHAR(50),
   PRIMARY KEY (`id`),
   CONSTRAINT `ordenes_ibfk_1`
     FOREIGN KEY (`id_apartamento`)
@@ -135,6 +140,7 @@ CREATE TABLE IF NOT EXISTS `AlquilaTuEvento`.`ordenes` (
 ) ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8mb4
 ROW_FORMAT = DYNAMIC;
+
 
 
 CREATE TABLE IF NOT EXISTS `AlquilaTuEvento`.`usuarios` (

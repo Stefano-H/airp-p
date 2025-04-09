@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mysql = require('mysql2/promise'); // Usar versión con promesas
 const cors = require('cors');
+const stripe = require('stripe')('sk_test_51RBtjRIdZv7qeALIynbnXNPNTineSJF2ajTfQ9LbZLJXoP1pgAC83QJfa708lRZbjPxWDV7Px0s0TP6fkn1d5QVT0005hqPB8a');
 
 const app = express();
 const port = 3000;
@@ -761,6 +762,69 @@ app.post('/api/updateUserDocuments', async (req, res) => {
   }
 });
 
+// Endpoint para crear Payment Intent
+app.post('/create-payment-intent', async (req, res) => {
+  try {
+      const { amount, metadata } = req.body;
+      
+      const paymentIntent = await stripe.paymentIntents.create({
+          amount,
+          currency: 'eur',
+          metadata,
+          automatic_payment_methods: { enabled: true }
+      });
+
+      res.json({
+          clientSecret: paymentIntent.client_secret,
+          paymentId: paymentIntent.id
+      });
+
+  } catch (error) {
+      console.error('Error creating payment intent:', error);
+      res.status(500).json({ error: error.message });
+  }
+});
+
+// Endpoint para confirmar el pago y guardar la orden
+app.post('/confirm-payment', async (req, res) => {
+  try {
+      const { paymentId, orderData } = req.body;
+      
+      // Verificar pago con Stripe
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentId);
+      
+      if (paymentIntent.status !== 'succeeded') {
+          throw new Error('El pago no fue exitoso');
+      }
+
+      // Insertar en la base de datos
+      const query = `
+          INSERT INTO ordenes (
+              id_clerk_cliente, id_apartamento, nombre_apellido, 
+              check_in, check_out, numero_telefono, notas_adicionales, 
+              monto_total, stripe_payment_id, estado_pago
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'completado')
+      `;
+      
+      await pool.query(query, [
+          orderData.id_clerk_cliente,
+          orderData.id_apartamento,
+          orderData.nombre_apellido,
+          orderData.check_in,
+          orderData.check_out,
+          orderData.numero_telefono,
+          orderData.notas_adicionales,
+          orderData.monto_total,
+          orderData.stripe_payment_id
+      ]);
+
+      res.json({ success: true });
+
+  } catch (error) {
+      console.error('Error confirming payment:', error);
+      res.status(500).json({ error: error.message });
+  }
+});
 
 
 // Iniciar el servidor

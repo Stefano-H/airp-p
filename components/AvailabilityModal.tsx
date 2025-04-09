@@ -1,35 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Modal, StyleSheet, TouchableOpacity, SafeAreaView, TextInput, ScrollView } from 'react-native';
+import { 
+  View, 
+  Text, 
+  Modal, 
+  StyleSheet, 
+  TouchableOpacity, 
+  SafeAreaView, 
+  TextInput, 
+  ScrollView,
+  ActivityIndicator,
+  Alert 
+} from 'react-native';
 import { Calendar, DateObject } from 'react-native-calendars';
 import axios from 'axios';
 import Colors from '@/constants/Colors';
-import { format, eachDayOfInterval, parseISO } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { useUser } from '@clerk/clerk-expo';
 import OrderSummaryModal from './OrderSummaryModal';
 import { Ionicons } from '@expo/vector-icons';
 import API_BASE_URL from '@/utils/apiConfig';
+import { useStripe } from '@stripe/stripe-react-native';
+import { useRouter } from 'expo-router';
 
 interface AvailabilityModalProps {
     visible: boolean;
     onClose: () => void;
     listingId: string;
+    pricePerNight: number;
 }
 
-const AvailabilityModal = ({ visible, onClose, listingId }: AvailabilityModalProps) => {
+const AvailabilityModal = ({ visible, onClose, listingId, pricePerNight }: AvailabilityModalProps) => {
     const { user } = useUser();
-    const [selectedDates, setSelectedDates] = useState<{ [key: string]: { disabled?: boolean, disableTouchEvent?: boolean, color?: string, marked?: boolean, dotColor?: string, selected?: boolean, selectedColor?: string } }>({});
+    const router = useRouter();
+    const stripe = useStripe();
+    const [selectedDates, setSelectedDates] = useState<{ [key: string]: any }>({});
     const [showCalendar, setShowCalendar] = useState(false);
     const [isCheckIn, setIsCheckIn] = useState(true);
     const [checkInDate, setCheckInDate] = useState('');
     const [checkOutDate, setCheckOutDate] = useState('');
-    const [checkInTime, setCheckInTime] = useState({ hour: '', minute: '' });
-    const [checkOutTime, setCheckOutTime] = useState({ hour: '', minute: '' });
+    const [checkInTime, setCheckInTime] = useState({ hour: '14', minute: '00' });
+    const [checkOutTime, setCheckOutTime] = useState({ hour: '12', minute: '00' });
     const [fullName, setFullName] = useState('');
     const [phone, setPhone] = useState('');
     const [notes, setNotes] = useState('');
-    const [orderSummaryVisible, setOrderSummaryVisible] = useState(false);
-    const [orderData, setOrderData] = useState(null);
-    const [datesUpdated, setDatesUpdated] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [totalAmount, setTotalAmount] = useState(0);
 
     useEffect(() => {
         const fetchAvailability = async () => {
@@ -48,415 +63,323 @@ const AvailabilityModal = ({ visible, onClose, listingId }: AvailabilityModalPro
             }
         };
 
-        if (visible) {
-            fetchAvailability();
-        }
+        if (visible) fetchAvailability();
     }, [visible, listingId]);
 
-    const handleDayPress = (day: DateObject) => {
-        if (selectedDates[day.dateString]?.disabled) {
-            return; // No permitir la selección de fechas no disponibles
+    useEffect(() => {
+        if (checkInDate && checkOutDate) {
+            const days = Math.ceil(
+                (new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) / (1000 * 3600 * 24)
+            );
+            setTotalAmount(days * pricePerNight);
         }
-    
-        setSelectedDates(prevDates => {
-            const newDates = { ...prevDates };
-    
+    }, [checkInDate, checkOutDate, pricePerNight]);
+
+    const handleDayPress = (day: DateObject) => {
+        if (selectedDates[day.dateString]?.disabled) return;
+
+        setSelectedDates(prev => {
+            const newDates = { ...prev };
             if (isCheckIn) {
-                // Deseleccionar el día anterior de check-in si existe
-                if (checkInDate) {
-                    delete newDates[checkInDate];
-                }
-                // Seleccionar el nuevo día de check-in
+                if (checkInDate) delete newDates[checkInDate];
                 setCheckInDate(day.dateString);
                 newDates[day.dateString] = { selected: true, selectedColor: Colors.primary };
             } else {
-                // Deseleccionar el día anterior de check-out si existe
-                if (checkOutDate) {
-                    delete newDates[checkOutDate];
-                }
-                // Seleccionar el nuevo día de check-out
+                if (checkOutDate) delete newDates[checkOutDate];
                 setCheckOutDate(day.dateString);
                 newDates[day.dateString] = { selected: true, selectedColor: Colors.primary };
             }
-    
             return newDates;
         });
-    
-        // Forzar una actualización del estado de las fechas seleccionadas
-        setSelectedDates(prevDates => ({ ...prevDates }));
-        setDatesUpdated(true);
     };
 
-    // Obtener la fecha actual y formatearla
-    const today = format(new Date(), 'yyyy-MM-dd');
-
-    // Marcar la fecha actual como deshabilitada y resaltada
-    useEffect(() => {
-        if (datesUpdated) {
-            setSelectedDates(prevDates => {
-                const newDates = { ...prevDates };
-    
-                // Limpiar los puntos rojos excedentes
-                Object.keys(newDates).forEach(date => {
-                    if (newDates[date].marked && !newDates[date].selected) {
-                        delete newDates[date].marked;
-                        delete newDates[date].dotColor;
-                    }
-                });
-    
-                // Resaltar los días entre check-in y check-out
-                if (checkInDate && checkOutDate) {
-                    const interval = eachDayOfInterval({
-                        start: parseISO(checkInDate),
-                        end: parseISO(checkOutDate),
-                    });
-    
-                    interval.forEach(date => {
-                        const dateString = format(date, 'yyyy-MM-dd');
-                        if (dateString !== checkInDate && dateString !== checkOutDate) {
-                            newDates[dateString] = { ...newDates[dateString], color: 'rgba(255, 56, 92, 0.3)', marked: true, dotColor: Colors.primary };
-                        }
-                    });
-                }
-    
-                console.log('Fechas seleccionadas después de actualizar:', newDates);
-                return newDates;
-            });
-    
-            setDatesUpdated(false);
+    const validateFields = () => {
+        if (!checkInDate || !checkOutDate) {
+            Alert.alert('Error', 'Por favor selecciona fechas de check-in y check-out');
+            return false;
         }
-    }, [datesUpdated, checkInDate, checkOutDate]);
-
-    const toggleCalendar = (isCheckInSelected: boolean) => {
-        if (isCheckInSelected === isCheckIn && showCalendar) {
-            setShowCalendar(false);
-        } else {
-            setIsCheckIn(isCheckInSelected);
-            setShowCalendar(true);
+        if (!fullName.trim()) {
+            Alert.alert('Error', 'Por favor ingresa tu nombre completo');
+            return false;
         }
+        if (!phone.trim()) {
+            Alert.alert('Error', 'Por favor ingresa un número de teléfono válido');
+            return false;
+        }
+        return true;
     };
 
-    const handleSave = async () => {
-        if (!user) {
-            alert('Usuario no autenticado');
-            return;
-        }
-
-        const checkInDateTime = `${checkInDate} ${checkInTime.hour}:${checkInTime.minute}:00`;
-        const checkOutDateTime = `${checkOutDate} ${checkOutTime.hour}:${checkOutTime.minute}:00`;
-
-        const orderData = {
-            id_clerk_cliente: user.id,
-            id_apartamento: listingId,
-            nombre_apellido: fullName,
-            check_in: checkInDateTime,
-            check_out: checkOutDateTime,
-            numero_telefono: phone,
-            notas_adicionales: notes,
-            confirmado: false,
-        };
+    const handlePayment = async () => {
+        if (!validateFields()) return;
+        setLoading(true);
 
         try {
-            await axios.post(`${API_BASE_URL}/ordenes`, orderData);
-            setOrderData(orderData);
-            setOrderSummaryVisible(true);
+            // 1. Crear intención de pago en el backend
+            const paymentResponse = await axios.post(`${API_BASE_URL}/create-payment-intent`, {
+                amount: totalAmount * 100, // Stripe requiere centavos
+                currency: 'eur',
+                listingId,
+                metadata: {
+                    checkIn: `${checkInDate} ${checkInTime.hour}:${checkInTime.minute}:00`,
+                    checkOut: `${checkOutDate} ${checkOutTime.hour}:${checkOutTime.minute}:00`,
+                    userId: user?.id
+                }
+            });
+
+            // 2. Inicializar Stripe Payment Sheet
+            const { error: initError } = await stripe.initPaymentSheet({
+                paymentIntentClientSecret: paymentResponse.data.clientSecret,
+                merchantDisplayName: "AlquilaTuEvento",
+            });
+
+            if (initError) throw initError;
+
+            // 3. Mostrar el Payment Sheet
+            const { error: paymentError } = await stripe.presentPaymentSheet();
+
+            if (paymentError) throw paymentError;
+
+            // 4. Confirmar el pago en el backend
+            await axios.post(`${API_BASE_URL}/confirm-payment`, {
+                paymentId: paymentResponse.data.paymentId,
+                orderData: {
+                    id_clerk_cliente: user?.id,
+                    id_apartamento: listingId,
+                    nombre_apellido: fullName,
+                    check_in: `${checkInDate} ${checkInTime.hour}:${checkInTime.minute}:00`,
+                    check_out: `${checkOutDate} ${checkOutTime.hour}:${checkOutTime.minute}:00`,
+                    numero_telefono: phone,
+                    notas_adicionales: notes,
+                    monto_total: totalAmount,
+                    stripe_payment_id: paymentResponse.data.paymentId
+                }
+            });
+
+            // 5. Redirigir a confirmación
+            router.push(`/reserva-confirmada/${paymentResponse.data.orderId}`);
+            onClose();
+
         } catch (error) {
-            console.error('Error saving order:', error);
-            alert('Error al guardar la orden');
+            Alert.alert('Error en el pago', error.message || 'Ocurrió un error al procesar el pago');
+        } finally {
+            setLoading(false);
         }
     };
 
     return (
-        <>
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={visible}
-                onRequestClose={onClose}
-            >
-                <SafeAreaView style={styles.safeArea}>
-                    <ScrollView contentContainerStyle={styles.scrollViewContent}>
-                        <View style={styles.modalContent}>
-                            <Text style={styles.title}>Configura Disponibilidad</Text>
-                            <TouchableOpacity onPress={() => toggleCalendar(true)} style={styles.checkInContainer}>
-                                <Ionicons name="calendar-outline" size={24} color={Colors.grey} style={styles.checkInIcon} />
-                                <TextInput
-                                    style={styles.checkInInput}
-                                    placeholder="Check-in"
-                                    value={`Check-In: ${checkInDate}`}
-                                    editable={false}
-                                />
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={visible}
+            onRequestClose={onClose}
+        >
+            <SafeAreaView style={styles.safeArea}>
+                <ScrollView contentContainerStyle={styles.scrollViewContent}>
+                    <View style={styles.modalContent}>
+                        <Text style={styles.title}>Completar Reserva</Text>
+
+                        {/* Sección de fechas */}
+                        <View style={styles.dateSection}>
+                            <TouchableOpacity 
+                                style={styles.dateInput} 
+                                onPress={() => { setIsCheckIn(true); setShowCalendar(true); }}
+                            >
+                                <Ionicons name="calendar" size={20} color={Colors.grey} />
+                                <Text style={styles.dateText}>
+                                    {checkInDate || 'Seleccionar Check-in'}
+                                </Text>
                             </TouchableOpacity>
-                            {showCalendar && isCheckIn && (
-                                <>
-                                    <Calendar
-                                        onDayPress={handleDayPress}
-                                        markedDates={selectedDates}
-                                        minDate={today} // Deshabilitar todas las fechas anteriores a hoy
-                                    />
-                                    {checkInDate && (
-                                        <View style={styles.timeContainer}>
-                                            <View style={styles.timeInputContainer}>
-                                                <Text style={styles.timeLabel}>Hora</Text>
-                                                <TextInput
-                                                    style={styles.timeInput}
-                                                    placeholder="Hora"
-                                                    keyboardType="numeric"
-                                                    value={checkInTime.hour}
-                                                    onChangeText={(text) => setCheckInTime({ ...checkInTime, hour: text })}
-                                                />
-                                            </View>
-                                            <View style={styles.timeInputContainer}>
-                                                <Text style={styles.timeLabel}>Minuto</Text>
-                                                <TextInput
-                                                    style={styles.timeInput}
-                                                    placeholder="Minuto"
-                                                    keyboardType="numeric"
-                                                    value={checkInTime.minute}
-                                                    onChangeText={(text) => setCheckInTime({ ...checkInTime, minute: text })}
-                                                />
-                                            </View>
-                                        </View>
-                                    )}
-                                </>
-                            )}
-                            <TouchableOpacity onPress={() => toggleCalendar(false)} style={styles.checkOutContainer}>
-                                <Ionicons name="calendar-outline" size={24} color={Colors.grey} style={styles.checkOutIcon} />
-                                <TextInput
-                                    style={styles.checkOutInput}
-                                    placeholder="Check-out"
-                                    value={`Check-Out: ${checkOutDate}`}
-                                    editable={false}
-                                />
-                            </TouchableOpacity>
-                            {showCalendar && !isCheckIn && (
-                                <>
-                                    <Calendar
-                                        onDayPress={handleDayPress}
-                                        markedDates={selectedDates}
-                                        minDate={today} // Deshabilitar todas las fechas anteriores a hoy
-                                    />
-                                    {checkOutDate && (
-                                        <View style={styles.timeContainer}>
-                                            <View style={styles.timeInputContainer}>
-                                                <Text style={styles.timeLabel}>Hora</Text>
-                                                <TextInput
-                                                    style={styles.timeInput}
-                                                    placeholder="Hora"
-                                                    keyboardType="numeric"
-                                                    value={checkOutTime.hour}
-                                                    onChangeText={(text) => setCheckOutTime({ ...checkOutTime, hour: text })}
-                                                />
-                                            </View>
-                                            <View style={styles.timeInputContainer}>
-                                                <Text style={styles.timeLabel}>Minuto</Text>
-                                                <TextInput
-                                                    style={styles.timeInput}
-                                                    placeholder="Minuto"
-                                                    keyboardType="numeric"
-                                                    value={checkOutTime.minute}
-                                                    onChangeText={(text) => setCheckOutTime({ ...checkOutTime, minute: text })}
-                                                />
-                                            </View>
-                                        </View>
-                                    )}
-                                </>
-                            )}
-                            <Text style={styles.sectionTitle}>Datos Personales</Text>
-                            <View style={styles.inputContainer}>
-                                <Ionicons name="person-outline" size={24} color={Colors.grey} style={styles.inputIcon} />
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Nombre y Apellido"
-                                    value={fullName}
-                                    onChangeText={setFullName}
-                                />
-                            </View>
-                            <View style={styles.inputContainer}>
-                                <Ionicons name="call-outline" size={24} color={Colors.grey} style={styles.inputIcon} />
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Teléfono (WhatsApp)"
-                                    keyboardType="phone-pad"
-                                    value={phone}
-                                    onChangeText={setPhone}
-                                />
-                            </View>
-                            <View style={styles.inputContainer}>
-                                <Ionicons name="chatbubble-outline" size={24} color={Colors.grey} style={styles.inputIcon} />
-                                <TextInput
-                                    style={styles.input}
-                                    placeholder="Notas adicionales"
-                                    value={notes}
-                                    onChangeText={setNotes}
-                                    multiline
-                                />
-                            </View>
-                            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
-                                <Ionicons name="send-outline" size={24} color="#fff" style={styles.buttonIcon} />
-                                <Text style={styles.saveButtonText}>Enviar</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                                <Ionicons name="close-outline" size={24} color="#fff" style={styles.buttonIcon} />
-                                <Text style={styles.closeButtonText}>Cerrar</Text>
+
+                            <TouchableOpacity 
+                                style={styles.dateInput} 
+                                onPress={() => { setIsCheckIn(false); setShowCalendar(true); }}
+                            >
+                                <Ionicons name="calendar" size={20} color={Colors.grey} />
+                                <Text style={styles.dateText}>
+                                    {checkOutDate || 'Seleccionar Check-out'}
+                                </Text>
                             </TouchableOpacity>
                         </View>
-                    </ScrollView>
-                </SafeAreaView>
-            </Modal>
-            {orderData && (
-                <OrderSummaryModal
-                    visible={orderSummaryVisible}
-                    onClose={() => setOrderSummaryVisible(false)}
-                    orderData={orderData}
-                />
-            )}
-        </>
+
+                        {showCalendar && (
+                            <Calendar
+                                onDayPress={handleDayPress}
+                                markedDates={selectedDates}
+                                minDate={format(new Date(), 'yyyy-MM-dd')}
+                                theme={{
+                                    todayTextColor: Colors.primary,
+                                    selectedDayBackgroundColor: Colors.primary
+                                }}
+                            />
+                        )}
+
+                        {/* Campos de información personal */}
+                        <Text style={styles.sectionTitle}>Tus Datos</Text>
+                        <View style={styles.inputGroup}>
+                            <Ionicons name="person" size={20} color={Colors.grey} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Nombre Completo"
+                                value={fullName}
+                                onChangeText={setFullName}
+                            />
+                        </View>
+                        
+                        <View style={styles.inputGroup}>
+                            <Ionicons name="call" size={20} color={Colors.grey} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Teléfono"
+                                keyboardType="phone-pad"
+                                value={phone}
+                                onChangeText={setPhone}
+                            />
+                        </View>
+
+                        {/* Resumen de pago */}
+                        <Text style={styles.sectionTitle}>Resumen del Pago</Text>
+                        <View style={styles.paymentSummary}>
+                            <View style={styles.summaryRow}>
+                                <Text style={styles.summaryLabel}>{pricePerNight}€ x noche</Text>
+                                <Text style={styles.summaryValue}>{totalAmount}€</Text>
+                            </View>
+                        </View>
+
+                        {/* Botones */}
+                        <TouchableOpacity 
+                            style={styles.payButton} 
+                            onPress={handlePayment}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ActivityIndicator color="#fff" />
+                            ) : (
+                                <>
+                                    <Ionicons name="lock-closed" size={18} color="#fff" />
+                                    <Text style={styles.payButtonText}>Pagar Ahora</Text>
+                                </>
+                            )}
+                        </TouchableOpacity>
+
+                        <TouchableOpacity 
+                            style={styles.cancelButton} 
+                            onPress={onClose}
+                            disabled={loading}
+                        >
+                            <Text style={styles.cancelButtonText}>Cancelar</Text>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </SafeAreaView>
+        </Modal>
     );
 };
 
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: 'rgba(0,0,0,0.5)'
     },
     scrollViewContent: {
         flexGrow: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: 'center'
     },
     modalContent: {
-        width: '90%',
         backgroundColor: '#fff',
-        borderRadius: 10,
+        borderRadius: 20,
         padding: 20,
-        alignItems: 'center',
+        marginHorizontal: 20
     },
     title: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 20,
+        fontSize: 22,
+        fontFamily: 'mon-b',
+        textAlign: 'center',
+        marginBottom: 20
     },
-    input: {
-        width: '100%',
-        padding: 10,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
-        marginBottom: 10,
+    dateSection: {
+        gap: 10,
+        marginBottom: 20
     },
-    timeContainer: {
+    dateInput: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-        marginBottom: 10,
-    },
-    timeInputContainer: {
-        width: '48%',
-    },
-    timeLabel: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        marginBottom: 5,
-    },
-    timeInput: {
-        padding: 10,
+        alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 5,
+        borderColor: Colors.grey,
+        borderRadius: 10,
+        padding: 15,
+        gap: 10
+    },
+    dateText: {
+        fontFamily: 'mon',
+        color: Colors.dark
     },
     sectionTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginVertical: 20,
-        alignSelf: 'center',
+        fontFamily: 'mon-sb',
+        fontSize: 16,
+        color: Colors.dark,
+        marginVertical: 15
     },
-    saveButton: {
+    inputGroup: {
         flexDirection: 'row',
         alignItems: 'center',
+        borderWidth: 1,
+        borderColor: Colors.grey,
+        borderRadius: 10,
+        padding: 15,
+        gap: 10,
+        marginBottom: 15
+    },
+    input: {
+        flex: 1,
+        fontFamily: 'mon',
+        fontSize: 16
+    },
+    paymentSummary: {
+        backgroundColor: Colors.lightGrey,
+        borderRadius: 10,
+        padding: 15,
+        marginVertical: 10
+    },
+    summaryRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginBottom: 5
+    },
+    summaryLabel: {
+        fontFamily: 'mon',
+        color: Colors.grey
+    },
+    summaryValue: {
+        fontFamily: 'mon-b',
+        color: Colors.dark
+    },
+    payButton: {
+        flexDirection: 'row',
         justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: Colors.primary,
+        borderRadius: 10,
+        padding: 15,
         marginTop: 20,
-        padding: 10,
-        backgroundColor: '#22ab49',
-        borderRadius: 8,
-        width: '90%', // Ajusta el ancho del botón
-        alignSelf: 'center', // Centra el botón horizontalmente
+        gap: 10
     },
-    saveButtonText: {
+    payButtonText: {
         color: '#fff',
-        fontSize: 16,
-        fontFamily: 'mon-sb',
+        fontFamily: 'mon-b',
+        fontSize: 16
     },
-    closeButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginTop: 10,
-        padding: 10,
-        backgroundColor: '#2196F3',
-        borderRadius: 8,
-        width: '90%', // Ajusta el ancho del botón
-        alignSelf: 'center', // Centra el botón horizontalmente
-    },
-    closeButtonText: {
-        color: '#fff',
-        fontSize: 16,
-        fontFamily: 'mon-sb',
-    },
-    checkInContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#fff',
+    cancelButton: {
         borderWidth: 1,
         borderColor: Colors.grey,
-        borderRadius: 8,
-        padding: 10,
-        marginVertical: 10,
-    },
-    checkInIcon: {
-        marginRight: 10,
-    },
-    checkInInput: {
-        flex: 1,
-        fontSize: 16,
-        color: '#000',
-        fontFamily: 'mon-sb',
-    },
-    checkOutContainer: {
-        flexDirection: 'row',
+        borderRadius: 10,
+        padding: 15,
         alignItems: 'center',
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: Colors.grey,
-        borderRadius: 8,
-        padding: 10,
-        marginVertical: 10,
+        marginTop: 10
     },
-    checkOutIcon: {
-        marginRight: 10,
-    },
-    checkOutInput: {
-        flex: 1,
-        fontSize: 16,
-        color: '#000',
-        fontFamily: 'mon-sb',
-    },
-    inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: Colors.grey,
-        borderRadius: 8,
-        padding: 10,
-        marginVertical: 10,
-    },
-    inputIcon: {
-        marginRight: 10,
-    },
-    buttonIcon: {
-        marginRight: 10,
-    },
+    cancelButtonText: {
+        color: Colors.dark,
+        fontFamily: 'mon-sb'
+    }
 });
 
 export default AvailabilityModal;
