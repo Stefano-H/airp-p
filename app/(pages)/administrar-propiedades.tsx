@@ -306,23 +306,33 @@ const Page = () => {
             onUpdate={handleUpdate}
           />
         ) : (
-          <ScrollView contentContainerStyle={styles.listingsContainer}>
-            {items.map((listing) => (
-              <View key={listing.id} style={styles.listingCard}>
-                <Image
-                  style={styles.listingImage}
-                  source={{ uri: listing.miniatura }}
-                />
-                <Text style={styles.listingTitle}>{listing.nombre}</Text>
-                <Text numberOfLines={2}>{listing.descripción}</Text>
-                <Text>Precio: {listing.precio}</Text>
-                <Text></Text>
-                <Button title="Editar" onPress={() => handleEdit(listing)} color="#000000"/>
-                <Text></Text>
-                <Button title="Reservas" onPress={() => handleEdit(listing)} color={Colors.red} />
-              </View>
-            ))}
-          </ScrollView>
+          items.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <Image
+                source={require('../(tabs)/propiedad.png')}
+                style={styles.emptyImage}
+              />
+              <Text style={styles.emptyMessage}>No tienes apartamentos por ahora.</Text>
+            </View>
+          ) : (
+            <ScrollView contentContainerStyle={styles.listingsContainer}>
+              {items.map((listing) => (
+                <View key={listing.id} style={styles.listingCard}>
+                  <Image
+                    style={styles.listingImage}
+                    source={{ uri: listing.miniatura }}
+                  />
+                  <Text style={styles.listingTitle}>{listing.nombre}</Text>
+                  <Text numberOfLines={2}>{listing.descripción}</Text>
+                  <Text>Precio: {listing.precio}</Text>
+                  <Text></Text>
+                  <Button title="Editar" onPress={() => handleEdit(listing)} color="#000000"/>
+                  <Text></Text>
+                  <Button title="Reservas" onPress={() => handleEdit(listing)} color={Colors.red} />
+                </View>
+              ))}
+            </ScrollView>
+          )
         )}
       </View>
     </SafeAreaView>
@@ -403,6 +413,24 @@ const styles = StyleSheet.create({
     height: 150,
     marginBottom: 10,
     borderRadius: 5,
+  },
+  emptyContainer: {
+    flex: 1,
+    padding: 20,
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    paddingTop: 100, 
+  },  
+  emptyImage: {
+    width: 150,
+    height: 150,
+    marginBottom: 20,
+  },
+  emptyMessage: {
+    fontSize: 18,
+    color: '#555',
+    textAlign: 'center',
+    fontFamily: 'mon-sb',
   },
 });
 

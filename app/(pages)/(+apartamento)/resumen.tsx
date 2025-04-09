@@ -96,10 +96,10 @@ export default function Resumen() {
               Dormitorios: {formData.paso1_3.dormitorios}{"\n"}
               Camas: {formData.paso1_3.camas}{"\n"}
               Baños: {formData.paso1_3.baños}{"\n"}
-              Parking: {formData.paso1_3.parking}{"\n"}
-              Piscina: {formData.paso1_3.piscina}{"\n"}
-              Gimnasio: {formData.paso1_3.gimnasio}{"\n"}
-              Cancelación: {formData.paso1_3.cancelación}
+              Parking: {formData.paso1_3.parking === 1 ? 'Sí' : 'No'}{"\n"}
+              Piscina: {formData.paso1_3.piscina === 1 ? 'Sí' : 'No'}{"\n"}
+              Gimnasio: {formData.paso1_3.gimnasio === 1 ? 'Sí' : 'No'}{"\n"}
+              Cancelación: {formData.paso1_3.cancelación === 1 ? 'Sí' : 'No'}
             </Text>
           ) : (
             <Text style={styles.cardItem}>No se ha registrado la información del espacio.</Text>

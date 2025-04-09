@@ -72,8 +72,8 @@ useFocusEffect(
           const data = await response.json();
           console.log('Data recibida:', data);
 
-          setRole(data.role);
-          console.log('Rol del usuario:', data.role);
+          setRole(data.propietario);
+          console.log('Rol del usuario:', data.propietario);
         } catch (error) {
           console.error("Error al obtener el rol del usuario:", error);
         }
@@ -227,11 +227,12 @@ useFocusEffect(
           </View>
         )}
         
-        {isSignedIn && role === 'propietario' && (
+        {isSignedIn && Number(role) === 1 && (
           <TouchableOpacity style={styles.button} onPress={() => router.push('/(pages)/administrar-propiedades')}>
             <Text style={styles.buttonText}>Administrar Propiedades</Text>
           </TouchableOpacity>
         )}
+
 
         <View style={styles.logbutton}>
           {isSignedIn && <Button title="Cerrar sesión" onPress={() => signOut()} color={Colors.dark} />}

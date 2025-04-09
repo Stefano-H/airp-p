@@ -133,7 +133,7 @@ app.post('/api/getUserRole', async (req, res) => {
     const connection = await pool.getConnection(); // 📌 Usar `await` para obtener la conexión
     console.log("🔄 Conexión a la base de datos establecida.");
 
-    const query = "SELECT rol FROM usuarios WHERE clerk_id = ?";
+    const query = "SELECT propietario FROM usuarios WHERE clerk_id = ?";
     const [results] = await connection.execute(query, [clerkId]); // 📌 `execute` en lugar de `query`
     
     connection.release(); // 🔹 Liberar la conexión
@@ -144,10 +144,10 @@ app.post('/api/getUserRole', async (req, res) => {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    return res.json({ role: results[0].rol });
+    return res.json({ propietario: results[0].propietario });
   } catch (err) {
     console.error('❌ Error en la consulta SQL:', err);
-    return res.status(500).json({ error: 'Error en la base de datos' });
+    return res.status(500).json({ error: 'Error en la base de datos' });0
   }
 });
 
