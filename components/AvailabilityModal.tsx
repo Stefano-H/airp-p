@@ -48,30 +48,50 @@ const AvailabilityModal = ({ visible, onClose, listingId, pricePerNight }: Avail
 
     useEffect(() => {
         const fetchAvailability = async () => {
-            try {
-                const response = await axios.get(`${API_BASE_URL}/getNotAvailability`, {
-                    params: { id: listingId }
-                });
-                const availability = response.data;
-                const newSelectedDates = availability.reduce((acc: any, date: string) => {
-                    acc[date] = { disabled: true, disableTouchEvent: true, color: Colors.grey };
-                    return acc;
-                }, {});
-                setSelectedDates(newSelectedDates);
-            } catch (error) {
-                console.error('Error fetching availability:', error);
+          try {
+            const response = await axios.get(`${API_BASE_URL}/getNotAvailability`, {
+              params: { id: listingId },
+            });
+            let availability = response.data;
+            // Si availability no es un arreglo, lo forzamos a vacío.
+            if (!Array.isArray(availability)) {
+              availability = [];
             }
+            const newSelectedDates = availability.reduce((acc: any, date: string) => {
+              acc[date] = { disabled: true, disableTouchEvent: true, color: Colors.grey };
+              return acc;
+            }, {});
+            setSelectedDates(newSelectedDates);
+          } catch (error) {
+            console.error('Error fetching availability:', error);
+            setSelectedDates({});
+          }
         };
-
+      
         if (visible) fetchAvailability();
-    }, [visible, listingId]);
+      }, [visible, listingId]);
 
     useEffect(() => {
         if (checkInDate && checkOutDate) {
-            const days = Math.ceil(
-                (new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) / (1000 * 3600 * 24)
-            );
-            setTotalAmount(days * pricePerNight);
+            const start = new Date(checkInDate);
+            const end = new Date(checkOutDate);
+            
+            // Calcular diferencia exacta en días
+            const timeDifference = end.getTime() - start.getTime();
+            const dayDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+            
+            // Validar que el precio sea un número válido
+            if (isNaN(pricePerNight) || pricePerNight <= 0) {
+                console.error('Precio por noche inválido:', pricePerNight);
+                return;
+            }
+            
+            setTotalAmount(dayDifference * pricePerNight);
+            
+            // Debug: Mostrar valores de cálculo
+            console.log('Días:', dayDifference);
+            console.log('Precio noche:', pricePerNight);
+            console.log('Total:', dayDifference * pricePerNight);
         }
     }, [checkInDate, checkOutDate, pricePerNight]);
 
@@ -112,7 +132,7 @@ const AvailabilityModal = ({ visible, onClose, listingId, pricePerNight }: Avail
     const handlePayment = async () => {
         if (!validateFields()) return;
         setLoading(true);
-
+      
         try {
             // 1. Crear intención de pago en el backend
             const paymentResponse = await axios.post(`${API_BASE_URL}/create-payment-intent`, {
@@ -125,22 +145,35 @@ const AvailabilityModal = ({ visible, onClose, listingId, pricePerNight }: Avail
                     userId: user?.id
                 }
             });
-
+            console.log('Payment Response:', paymentResponse.data);
+      
             // 2. Inicializar Stripe Payment Sheet
             const { error: initError } = await stripe.initPaymentSheet({
                 paymentIntentClientSecret: paymentResponse.data.clientSecret,
                 merchantDisplayName: "AlquilaTuEvento",
-            });
-
-            if (initError) throw initError;
-
+                returnURL: 'tuapp://stripe-redirect', 
+              });
+              
+            if (initError) {
+                console.error('Error initializing PaymentSheet:', initError);
+                throw new Error(initError.message || 'Error al iniciar el Payment Sheet');
+            }
+            console.log('PaymentSheet inicializado');
+      
             // 3. Mostrar el Payment Sheet
+            console.log('Mostrando PaymentSheet...');
+
             const { error: paymentError } = await stripe.presentPaymentSheet();
-
-            if (paymentError) throw paymentError;
-
+            
+            console.log('PaymentSheet presentado');
+            if (paymentError) {
+                console.error('Error presentando PaymentSheet:', paymentError);
+                throw new Error(paymentError.message || 'Error al presentar el Payment Sheet');
+            }
+            console.log('PaymentSheet completado, PaymentIntent debería actualizarse');
+      
             // 4. Confirmar el pago en el backend
-            await axios.post(`${API_BASE_URL}/confirm-payment`, {
+            const confirmResponse = await axios.post(`${API_BASE_URL}/confirm-payment`, {
                 paymentId: paymentResponse.data.paymentId,
                 orderData: {
                     id_clerk_cliente: user?.id,
@@ -154,17 +187,19 @@ const AvailabilityModal = ({ visible, onClose, listingId, pricePerNight }: Avail
                     stripe_payment_id: paymentResponse.data.paymentId
                 }
             });
-
+            console.log('Confirm payment response:', confirmResponse.data);
+      
             // 5. Redirigir a confirmación
-            router.push(`/reserva-confirmada/${paymentResponse.data.orderId}`);
+            router.push('/reserva-confirmada');
             onClose();
-
+      
         } catch (error) {
+            console.error('Error en el pago:', error);
             Alert.alert('Error en el pago', error.message || 'Ocurrió un error al procesar el pago');
         } finally {
             setLoading(false);
         }
-    };
+      };      
 
     return (
         <Modal
@@ -242,6 +277,15 @@ const AvailabilityModal = ({ visible, onClose, listingId, pricePerNight }: Avail
                             <View style={styles.summaryRow}>
                                 <Text style={styles.summaryLabel}>{pricePerNight}€ x noche</Text>
                                 <Text style={styles.summaryValue}>{totalAmount}€</Text>
+                            </View>
+                            <View style={styles.summaryRow}>
+                                <Text style={styles.summaryLabel}>Noches:</Text>
+                                <Text style={styles.summaryValue}>
+                                    {Math.ceil(
+                                        (new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) / 
+                                        (1000 * 3600 * 24)
+                                    )}
+                                </Text>
                             </View>
                         </View>
 

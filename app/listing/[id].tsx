@@ -486,7 +486,12 @@ const Page = () => {
                     <TouchableOpacity style={[defaultStyles.btn, { paddingRight: 20, paddingLeft: 20 }]} onPress={() => setModalVisible(true)}>
                         <Text style={defaultStyles.btnText}>Solicitar Reserva</Text>
                     </TouchableOpacity>
-                    <AvailabilityModal visible={modalVisible} onClose={() => setModalVisible(false)} listingId={id} />
+                    <AvailabilityModal 
+                        visible={modalVisible} 
+                        onClose={() => setModalVisible(false)} 
+                        listingId={id} 
+                        pricePerNight={Number(listing.precio)} 
+                    />
                 </View>
             </Animated.View>
         </View>

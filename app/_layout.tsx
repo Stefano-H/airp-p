@@ -14,8 +14,11 @@ import { EventProvider } from '@/context/EventContext';
 import { FormProvider } from '@/context/FormContext'; 
 import { StatusBar } from 'expo-status-bar';
 import Resumen from '@/app/(pages)/(+apartamento)/resumen'; 
+import { StripeProvider } from '@stripe/stripe-react-native';
 
 const CLERK_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+const STRIPE_PUBLISHABLE_KEY = process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY; 
+const APP_SCHEME = 'myapp'; 
 
 const tokenCache = {
   async getToken(key: string) {
@@ -69,16 +72,21 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar style="dark" backgroundColor="#fff" />
-      <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY!} tokenCache={tokenCache}>
-        <FavoritesProvider>
-          <FormProvider>
-            <EventProvider> 
-              {/* ✅ Envolvemos aquí para que todos los componentes puedan acceder a este contexto */}
+      <StripeProvider
+        publishableKey={STRIPE_PUBLISHABLE_KEY!}
+        merchantIdentifier="merchant.identifier" // para Apple Pay (puedes dejar fijo por ahora si no usas)
+        urlScheme={APP_SCHEME} // necesario para redirecciones
+      >
+        <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY!} tokenCache={tokenCache}>
+          <FavoritesProvider>
+            <FormProvider>
+              <EventProvider> 
                 <RootLayoutNav />
-            </EventProvider>
-          </FormProvider>
-        </FavoritesProvider>
-      </ClerkProvider>
+              </EventProvider>
+            </FormProvider>
+          </FavoritesProvider>
+        </ClerkProvider>
+      </StripeProvider>
     </GestureHandlerRootView>
   );
 }

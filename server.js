@@ -415,28 +415,10 @@ app.post('/updateNotAvailability', async (req, res) => {
 
 // Endpoint: Obtener disponibilidad
 app.get('/getNotAvailability', async (req, res) => {
-  const { id } = req.query;
-
-  if (!id) {
-    return res.status(400).send('ID parameter is required');
-  }
-
-  try {
-    const [results] = await pool.query(
-      'SELECT availability FROM listings WHERE id = ?',
-      [id]
-    );
-
-    if (results.length > 0) {
-      res.json(results[0].availability);
-    } else {
-      res.status(404).json({ error: 'Listing not found' });
-    }
-  } catch (error) {
-    console.error('Error fetching availability:', error);
-    res.status(500).send('Server Error');
-  }
+  // Como la columna "availability" no existe, simplemente retornamos un arreglo vacío.
+  res.json([]);
 });
+
 
 // Endpoint: Guardar una nueva orden
 app.post('/ordenes', async (req, res) => {
@@ -765,67 +747,67 @@ app.post('/api/updateUserDocuments', async (req, res) => {
 // Endpoint para crear Payment Intent
 app.post('/create-payment-intent', async (req, res) => {
   try {
-      const { amount, metadata } = req.body;
-      
-      const paymentIntent = await stripe.paymentIntents.create({
-          amount,
-          currency: 'eur',
-          metadata,
-          automatic_payment_methods: { enabled: true }
-      });
-
-      res.json({
-          clientSecret: paymentIntent.client_secret,
-          paymentId: paymentIntent.id
-      });
-
+    console.log('[create-payment-intent] Inicio');
+    const { amount, metadata } = req.body;
+    // Validación de amount
+    if (typeof amount !== 'number' || amount <= 0) {
+      console.error('[create-payment-intent] Monto inválido:', amount);
+      return res.status(400).json({ error: 'Amount must be a positive number.' });
+    }
+    const paymentIntent = await stripe.paymentIntents.create({
+        amount,
+        currency: 'eur',
+        metadata,
+        automatic_payment_methods: { enabled: true }
+    });
+    console.log('[create-payment-intent] PaymentIntent creado:', paymentIntent.id);
+    res.json({
+        clientSecret: paymentIntent.client_secret,
+        paymentId: paymentIntent.id
+    });
+    console.log('[create-payment-intent] Fin');
   } catch (error) {
-      console.error('Error creating payment intent:', error);
-      res.status(500).json({ error: error.message });
+    console.error('[create-payment-intent] Error:', error);
+    res.status(500).json({ error: error.message || 'Error al crear PaymentIntent.' });
   }
 });
 
 // Endpoint para confirmar el pago y guardar la orden
 app.post('/confirm-payment', async (req, res) => {
   try {
-      const { paymentId, orderData } = req.body;
-      
-      // Verificar pago con Stripe
-      const paymentIntent = await stripe.paymentIntents.retrieve(paymentId);
-      
-      if (paymentIntent.status !== 'succeeded') {
-          throw new Error('El pago no fue exitoso');
-      }
-
-      // Insertar en la base de datos
-      const query = `
-          INSERT INTO ordenes (
-              id_clerk_cliente, id_apartamento, nombre_apellido, 
-              check_in, check_out, numero_telefono, notas_adicionales, 
-              monto_total, stripe_payment_id, estado_pago
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'completado')
-      `;
-      
-      await pool.query(query, [
-          orderData.id_clerk_cliente,
-          orderData.id_apartamento,
-          orderData.nombre_apellido,
-          orderData.check_in,
-          orderData.check_out,
-          orderData.numero_telefono,
-          orderData.notas_adicionales,
-          orderData.monto_total,
-          orderData.stripe_payment_id
-      ]);
-
-      res.json({ success: true });
-
+    console.log('[confirm-payment] Inicio');
+    const { paymentId, orderData } = req.body;
+    const paymentIntent = await stripe.paymentIntents.retrieve(paymentId);
+    console.log('[confirm-payment] PaymentIntent status:', paymentIntent.status);
+    if (paymentIntent.status !== 'succeeded') {
+      throw new Error('El pago no fue exitoso');
+    }
+    // Insertar la orden en la base de datos...
+    // Por ejemplo:
+    const query = `
+        INSERT INTO ordenes (
+            id_clerk_cliente, id_apartamento, nombre_apellido, check_in, check_out, numero_telefono, notas_adicionales, monto_total, stripe_payment_id, estado_pago
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'completado')
+    `;
+    await pool.query(query, [
+        orderData.id_clerk_cliente,
+        orderData.id_apartamento,
+        orderData.nombre_apellido,
+        orderData.check_in,
+        orderData.check_out,
+        orderData.numero_telefono,
+        orderData.notas_adicionales,
+        orderData.monto_total,
+        orderData.stripe_payment_id
+    ]);
+    console.log('[confirm-payment] Orden insertada');
+    res.json({ success: true });
+    console.log('[confirm-payment] Fin');
   } catch (error) {
-      console.error('Error confirming payment:', error);
-      res.status(500).json({ error: error.message });
+    console.error('[confirm-payment] Error:', error);
+    res.status(500).json({ error: error.message });
   }
 });
-
 
 // Iniciar el servidor
 app.listen(port, () => {
