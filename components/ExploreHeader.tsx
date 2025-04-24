@@ -6,7 +6,6 @@ import {
   TouchableOpacity, 
   Image, 
   useWindowDimensions, 
-  ScrollView 
 } from 'react-native';
 import { useRef, useState } from 'react';
 import Colors from '@/constants/Colors';
@@ -16,6 +15,7 @@ import { FontAwesome5 } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Link } from 'expo-router';
 import GlobalStyles from '../Android-styles/GlobalStyles';
+import { ScrollView } from 'react-native-gesture-handler';
 import logo from '@/assets/images/inca3.1.1.png';
 
 const categories = [
@@ -32,13 +32,16 @@ interface Props {
 }
 
 const ExploreHeader = ({ onCategoryChanged }: Props) => {
+  const scrollRef = useRef<ScrollView | null>(null);
   const itemsRef = useRef<Array<TouchableOpacity | null>>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const { width } = useWindowDimensions();
 
-  // Conservamos la escala para la parte del buscador y logo
+  // Definimos un ancho base (por ejemplo, 375) de nuestro diseño original.
   const baseWidth = 375;
   const scale = width / baseWidth;
+
+  // Usamos las dimensiones originales y las escalamos
   const searchBtnWidth = 290 * scale; 
   const logoSize = 80 * scale;
 
@@ -51,7 +54,6 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
   return (
     <SafeAreaView style={GlobalStyles.droidSafeArea}>
       <View style={styles.container}>
-        {/* Fila de acción con buscador y logo */}
         <View style={styles.actionRow}>
           <Link href={'/(modals)/booking'} asChild>
             <TouchableOpacity onPress={() => console.log('Button pressed')}>
@@ -71,23 +73,22 @@ const ExploreHeader = ({ onCategoryChanged }: Props) => {
             />
           </TouchableOpacity>
         </View>
-        {/* Sección de categorías con estilo de NoExploreHeader.tsx */}
+
         <ScrollView
+          ref={scrollRef}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={{
             alignItems: 'center',
             gap: 20,
             paddingHorizontal: 16,
-          }}
-        >
+          }}>
           {categories.map((item, index) => (
             <TouchableOpacity
               key={index}
               ref={(el) => (itemsRef.current[index] = el)}
               style={activeIndex === index ? styles.categoriesBtnActive : styles.categoriesBtn}
-              onPress={() => selectCategory(index)}
-            >
+              onPress={() => selectCategory(index)}>
               {item.icon === 'ring' || item.icon === 'glass-cheers' || item.icon === 'briefcase' ? (
                 <FontAwesome5
                   name={item.icon as any}
@@ -121,7 +122,8 @@ const styles = StyleSheet.create({
   },
   logo: {
     left: 1,
-    // El tamaño se ajusta dinámicamente desde el componente
+    width: 40, // Ajusta el tamaño según sea necesario
+    height: 40, // Ajusta el tamaño según sea necesario
   },
   actionRow: {
     flexDirection: 'row',
@@ -154,7 +156,16 @@ const styles = StyleSheet.create({
     fontFamily: 'mon',
     fontSize: 10,
   },
-  // Estilos de categorías tomados de NoExploreHeader.tsx
+  categoryText: {
+    fontSize: 14,
+    fontFamily: 'mon-sb',
+    color: Colors.grey,
+  },
+  categoryTextActive: {
+    fontSize: 14,
+    fontFamily: 'mon-sb',
+    color: '#ff0000',
+  },
   categoriesBtn: {
     flex: 1,
     alignItems: 'center',
@@ -172,16 +183,6 @@ const styles = StyleSheet.create({
     borderTopWidth: 3,
     paddingBottom: 8,
     paddingTop: 10,
-  },
-  categoryText: {
-    fontSize: 14,
-    fontFamily: 'mon-sb',
-    color: Colors.grey,
-  },
-  categoryTextActive: {
-    fontSize: 14,
-    fontFamily: 'mon-sb',
-    color: '#ff0000',
   },
 });
 

@@ -1,4 +1,4 @@
-import { View, SafeAreaView } from 'react-native';
+import { View, SafeAreaView, ScrollView } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { Stack } from 'expo-router';
 import ExploreHeader from '@/components/ExploreHeader';
@@ -39,7 +39,11 @@ const Page = () => {
 
     return (
         <SafeAreaView style={GlobalStyles.droidSafeArea}>
-            <View style={{ flex: 1, marginTop: 90 }}>
+            <ScrollView 
+                style={{ flex: 1, marginTop: 90 }} 
+                contentContainerStyle={{ paddingBottom: 20 }}  // opcional: padding al final
+                showsVerticalScrollIndicator={false}
+                >
                 <Stack.Screen
                     options={{
                         header: () => <ExploreHeader onCategoryChanged={onCategoryChanged} />,
@@ -47,7 +51,7 @@ const Page = () => {
                 />
                 <Listings listings={items} category={category} />
                 {/* <ListingsMap listings={listingDataGeo} /> */}
-            </View>
+            </ScrollView>
         </SafeAreaView>
     );
 };

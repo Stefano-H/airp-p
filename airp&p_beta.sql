@@ -169,7 +169,7 @@ CREATE TABLE IF NOT EXISTS `AlquilaTuEvento`.`usuarios` (
 /*Apartamento 1 */
 INSERT INTO `AlquilaTuEvento`.`listings` (`id`, `estado`, `nombre`, `descripción`, `precio`, `miniatura`, `foto1`, `proceso_de_llegada`, `invitados_incluidos`, `cancelación`, `habitaciones`, `tipo_de_habitación`, `camas`, `baños`, `cochera`, `parking`, `piscina`, `gimnasio`, `review_scores_rating`, `number_of_reviews`) VALUES ('1', 'España', 'Apartemento en el campo', 'Bienvenidos a nuestro luminoso y cómodo apartamento, ideal para una estancia tranquila y agradable. Ubicado en el centro de la ciudad, estarás a solo unos minutos de las principales atracciones turísticas, restaurantes, tiendas y transporte público, lo que hace de este espacio el lugar perfecto para explorar todo lo que la ciudad tiene para ofrecer.', '50', 'https://a0.muscache.com/im/pictures/miso/Hosting-45306806/original/2c52733a-78b3-421d-a49a-bea959ab86da.jpeg', 'https://a0.muscache.com/im/pictures/miso/Hosting-45306806/original/2c52733a-78b3-421d-a49a-bea959ab86da.jpeg', '1', '40', '1', '4', 'Duplex', '3', '2', '1', '1', '1', '1', '85', '90');
 
-INSERT INTO `AlquilaTuEvento`.`categorias` (`id`, `Todas`, `Bodas`, `Fiestas`, `Frente_a_la_playa`, `Campo`, `EventosCorporativos`) VALUES ('1', '1', '1', '1', '1', '1', '1');
+INSERT INTO `AlquilaTuEvento`.`categorias` (`id`, `Todas`, `Bodas`, `Fiestas`, `Frente_a_la_playa`, `Campo`, `EventosCorporativos`) VALUES ('1', '1', '1', '0', '0', '1', '1');
 
 INSERT INTO `AlquilaTuEvento`.`direccion` (`id`, `distrito`, `ciudad`, `país`, `dirección`, `puerta`, `codigo_postal`) VALUES ('1', 'Sant Joan Despi', 'Barcelona', 'España', ' ', ' ', '08001');
 
@@ -184,7 +184,7 @@ INSERT INTO `AlquilaTuEvento`.`propietario` (`id`, `foto_url`, `id_usuario`, `no
 
 INSERT INTO `AlquilaTuEvento`.`listings` (`id`, `estado`, `nombre`, `descripción`, `precio`, `miniatura`, `foto1`, `proceso_de_llegada`, `invitados_incluidos`, `cancelación`, `habitaciones`, `tipo_de_habitación`, `camas`, `baños`, `cochera`, `parking`, `piscina`, `gimnasio`, `review_scores_rating`, `number_of_reviews`) VALUES ('2', 'España', 'Apartemento en la playa', 'Bienvenidos a nuestro luminoso y cómodo apartamento, ideal para una estancia tranquila y agradable. Ubicado en el centro de la ciudad, estarás a solo unos minutos de las principales atracciones turísticas, restaurantes, tiendas y transporte público, lo que hace de este espacio el lugar perfecto para explorar todo lo que la ciudad tiene para ofrecer.', '50', 'https://a0.muscache.com/im/pictures/miso/Hosting-702213972376625116/original/a8abb8b3-0846-4c21-9672-dbc76bbbeec7.jpeg', 'https://a0.muscache.com/im/pictures/miso/Hosting-702213972376625116/original/a8abb8b3-0846-4c21-9672-dbc76bbbeec7.jpeg', '1', '40', '1', '4', 'Duplex', '3', '2', '1', '1', '1', '1', '85', '90');
 
-INSERT INTO `AlquilaTuEvento`.`categorias` (`id`, `Todas`, `Bodas`, `Fiestas`, `Frente_a_la_playa`, `Campo`, `EventosCorporativos`) VALUES ('2', '1', '1', '1', '1', '1', '1');
+INSERT INTO `AlquilaTuEvento`.`categorias` (`id`, `Todas`, `Bodas`, `Fiestas`, `Frente_a_la_playa`, `Campo`, `EventosCorporativos`) VALUES ('2', '0', '1', '0', '1', '0', '1');
 
 INSERT INTO `AlquilaTuEvento`.`direccion` (`id`, `distrito`, `ciudad`, `país`, `dirección`, `puerta`, `codigo_postal`)  VALUES ('2', 'Sant Boi', 'Barcelona', 'España', ' ', ' ', '08001');
 
@@ -200,7 +200,7 @@ INSERT INTO `AlquilaTuEvento`.`listings` (`id`, `estado`, `nombre`, `descripció
 ('3', 'México', 'Casa con vista al mar', 'Hermosa casa con una espectacular vista al mar, equipada con todas las comodidades para una experiencia única. Ideal para familias o grupos de amigos que buscan relajarse y disfrutar.', '120', 'https://a0.muscache.com/im/pictures/miso/Hosting-702213972376625116/original/217efa09-cdb4-43d3-87db-a12264954d9a.jpeg', 'https://a0.muscache.com/im/pictures/miso/Hosting-702213972376625116/original/217efa09-cdb4-43d3-87db-a12264954d9a.jpeg', '2', '6', '1', '3', 'Casa', '4', '3', '1', '1', '1', '1', '90', '150');
 
 INSERT INTO `AlquilaTuEvento`.`categorias` (`id`, `Todas`, `Bodas`, `Fiestas`, `Frente_a_la_playa`, `Campo`, `EventosCorporativos`) VALUES 
-('3', '1', '1', '1', '1', '0', '0');
+('3', '1', '0', '1', '0', '1', '0');
 
 INSERT INTO `AlquilaTuEvento`.`direccion` (`id`, `distrito`, `ciudad`, `país`, `dirección`, `puerta`, `codigo_postal`) VALUES 
 ('3', 'Tulum', 'Quintana Roo', 'México', ' ', ' ', '77760');
