@@ -113,7 +113,7 @@ const handleFinalizar = async () => {
         throw new Error(data.error || 'Error desconocido');
       }
   
-      Alert.alert('Éxito', 'Documentos guardados');
+      // Alert.alert('Éxito', 'Documentos guardados');
       router.push('/verificacion/ConfirmacionVerificacion');
     } catch (error) {
       console.error('Error en handleFinalizar:', error); // 🔥

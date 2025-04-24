@@ -44,15 +44,15 @@ const Listings = ({ listings: items, category }: Props) => {
     const isFavorite = favorites.some(fav => fav.id === item.id);
     if (isFavorite) {
       removeFromFavorites(item.id);
-      setMessageText('Quitando de tu lista de Deseos!');
+      // setMessageText('Quitando de tu lista de Deseos!');
     } else {
       addToFavorites(item);
-      setMessageText('Añadido a tu lista de Deseos!');
+      // setMessageText('Añadido a tu lista de Deseos!');
     }
-    setShowMessage(true);
-    setTimeout(() => {
-      setShowMessage(false);
-    }, 3000);
+    // setShowMessage(true);
+    // setTimeout(() => {
+    //   setShowMessage(false);
+    // }, 3000);
   };
 
   const renderRow: ListRenderItem<Listing> = ({ item }) => (
