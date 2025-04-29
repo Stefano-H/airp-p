@@ -3,6 +3,7 @@ const bodyParser = require('body-parser');
 const mysql = require('mysql2/promise'); // Usar versión con promesas
 const cors = require('cors');
 const stripe = require('stripe')('sk_test_51RBtjRIdZv7qeALIynbnXNPNTineSJF2ajTfQ9LbZLJXoP1pgAC83QJfa708lRZbjPxWDV7Px0s0TP6fkn1d5QVT0005hqPB8a');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const port = 3000;
@@ -30,6 +31,34 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
+});
+
+// Pasarela simulada: valida tarjeta “1111222233334444” CVC “123”
+app.post('/mock-payment', async (req, res) => {
+  try {
+    const { cardNumber, expMonth, expYear, cvc, amount, metadata } = req.body;
+
+    // Validación hard-coded
+    if (cardNumber !== '1111222233334444' || cvc !== '123') {
+      return res.status(402).json({ status: 'declined', error: 'Tarjeta rechazada por mock-gateway' });
+    }
+    const now = new Date();
+    if (
+      expYear < now.getFullYear() ||
+      (expYear === now.getFullYear() && expMonth < now.getMonth() + 1)
+    ) {
+      return res.status(402).json({ status: 'declined', error: 'Tarjeta expirada' });
+    }
+
+    // Simulamos proceso…
+    const transactionId = uuidv4();
+    console.log(`[mock-payment] Aprobado tx=${transactionId}`, { amount, metadata });
+
+    return res.json({ status: 'approved', transactionId });
+  } catch (err) {
+    console.error('[mock-payment] Error:', err);
+    res.status(500).json({ status: 'error', error: 'Error interno mock-gateway' });
+  }
 });
 
 
@@ -154,12 +183,14 @@ app.post('/api/getUserRole', async (req, res) => {
 
 
 app.post('/webhooks/clerk', async (req, res) => {
+  console.log('algo')
   const event = req.body;
 
   // Verificar que los datos se estén extrayendo correctamente
   console.log('Evento recibido:', event);
 
   if (event.type === 'user.created') {
+    console.log('estoy dentro');
     const { id, first_name, last_name, email_addresses, image_url } = event.data;
 
     // Extracción de email
@@ -174,6 +205,7 @@ app.post('/webhooks/clerk', async (req, res) => {
 
     try {
       // Verifica si el usuario ya existe en la base de datos
+      console.log('estoy dentro 2');
       const [exists] = await pool.query('SELECT id FROM usuarios WHERE clerk_id = ?', [id]);
       if (!exists.length) {
         // Inserta el usuario en la base de datos
@@ -190,6 +222,7 @@ app.post('/webhooks/clerk', async (req, res) => {
       return res.sendStatus(500);
     }
   }
+  console.log('estoy fuera');
 
   res.sendStatus(200);
 });
@@ -431,12 +464,16 @@ app.post('/ordenes', async (req, res) => {
     numero_telefono,
     notas_adicionales,
     confirmado,
+    monto_total,
+    moneda,
+    estado_pago,
+    metodo_pago,
   } = req.body;
 
   const query = `
       INSERT INTO ordenes (
-          id_clerk_cliente, id_apartamento, nombre_apellido, check_in, check_out, numero_telefono, notas_adicionales, confirmado
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+          id_clerk_cliente, id_apartamento, nombre_apellido, fecha_check_in, fecha_check_out, telefono, notas_adicionales, confirmado, monto_total, moneda, estado_pago, metodo_pago
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `;
   const values = [
     id_clerk_cliente,
@@ -447,6 +484,10 @@ app.post('/ordenes', async (req, res) => {
     numero_telefono,
     notas_adicionales,
     confirmado,
+    monto_total,
+    moneda,
+    estado_pago,
+    metodo_pago,
   ];
 
   try {
