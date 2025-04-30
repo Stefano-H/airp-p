@@ -499,6 +499,54 @@ app.post('/ordenes', async (req, res) => {
   }
 });
 
+
+app.get('/ordenes', async (req, res) => {
+  const { id_clerk_cliente } = req.query;
+  if (!id_clerk_cliente) {
+    return res.status(400).json({ error: 'Se requiere id_clerk_cliente' });
+  }
+  try {
+    const [rows] = await pool.query(
+      'SELECT * FROM ordenes WHERE id_clerk_cliente = ? ORDER BY fecha_check_in DESC',
+      [id_clerk_cliente]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching orders:', err);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
+});
+
+
+app.get('/api/ordenes-by-user', async (req, res) => {
+  const { clerkId } = req.query;
+  if (!clerkId) return res.status(400).json({ error: 'Falta clerkId' });
+
+  try {
+    const [orders] = await pool.query(
+      `
+      SELECT 
+        o.*,
+        l.nombre              AS listing_name,
+        l.miniatura           AS listing_thumbnail,
+        l.\`descripción\`     AS listing_description,
+        l.precio              AS listing_price
+      FROM ordenes o
+      JOIN listings l 
+        ON o.id_apartamento = l.id
+      WHERE o.id_clerk_cliente = ?
+      ORDER BY o.fecha_check_in DESC
+      `,
+      [clerkId]
+    );
+    res.json(orders);
+  } catch (err) {
+    console.error('Error fetching orders:', err);
+    res.status(500).json({ error: 'Error en servidor' });
+  }
+});
+
+
 app.post('/create-listing', async (req, res) => {
   // Extraemos los datos enviados desde el cliente
   const { id_clerk, nombre_usuario, imagen_url, paso1_1, paso1_2, paso1_3, paso1_4, paso1_5, paso1_6, paso1_7 } = req.body;

@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -5,68 +6,74 @@ import {
   ScrollView,
   StyleSheet,
   TextInput,
-  Modal
+  Modal,
+  Image,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Colors from '@/constants/Colors';
-import { useState } from 'react';
+import { useUser } from '@clerk/clerk-expo';
+import axios from 'axios';
+import API_BASE_URL from '@/utils/apiConfig';
 import { TouchableWithoutFeedback } from 'react-native';
 
+interface Order {
+  id: number;
+  id_clerk_cliente: string;
+  id_apartamento: number;
+  nombre_apellido: string;
+  fecha_check_in: string;
+  fecha_check_out: string;
+  telefono: string;
+  notas_adicionales: string | null;
+  confirmado: number;
+  monto_total: number;
+  moneda: string;
+  stripe_payment_id: string;
+  estado_pago: 'pendiente' | 'completado' | 'fallido';
+  metodo_pago: string;
+  // campos extra traídos del JOIN con listings:
+  listing_name: string;
+  listing_miniatura: string;
+  listing_price: number;
+}
+
 const Orders = () => {
-  const [refundReason, setRefundReason] = useState('');
-  const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
-  const [showRefundModal, setShowRefundModal] = useState(false);
+  const { isLoaded, isSignedIn, user } = useUser();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
-  const orders = [
-    {
-      id: '1',
-      event: 'Fiesta de Cumpleaños',
-      date: '2025-04-25',
-      location: 'Barcelona, España',
-      price: '€1,200',
-      status: 'Confirmado'
-    },
-    {
-      id: '2',
-      event: 'Conferencia Corporativa',
-      date: '2025-03-15',
-      location: 'Madrid, España',
-      price: '€2,500',
-      status: 'Finalizado'
-    },
-    {
-      id: '3',
-      event: 'Boda en la Playa',
-      date: '2025-03-28',
-      location: 'Valencia, España',
-      price: '€3,000',
-      status: 'Confirmado'
-    },
-    {
-      id: '4',
-      event: 'Cena de Gala',
-      date: '2025-05-01',
-      location: 'Sevilla, España',
-      price: '€1,800',
-      status: 'Pendiente'
-    }
-  ];
+  useEffect(() => {
+    if (!isLoaded || !isSignedIn) return;
+    const fetchOrders = async () => {
+      setLoading(true);
+      try {
+        const resp = await axios.get<Order[]>(
+          `${API_BASE_URL}/api/ordenes-by-user`,
+          { params: { clerkId: user!.id } }
+        );
+        setOrders(resp.data);
+      } catch (err) {
+        console.error('Error fetching orders:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchOrders();
+  }, [isLoaded, isSignedIn, user]);
 
-  const isRefundable = (eventDate: string) => {
-    const now = new Date();
-    const event = new Date(eventDate);
-    const diffHours = (event.getTime() - now.getTime()) / 36e5;
-    return diffHours > 48;
-  };
-
-  const handleRefundRequest = () => {
-    console.log('Solicitud para:', selectedOrder);
-    console.log('Motivo:', refundReason);
-    setShowRefundModal(false);
-    setRefundReason('');
-  };
+  if (!isLoaded) return null;
+  if (!isSignedIn) {
+    return (
+      <SafeAreaView style={styles.loginOverlay}>
+        <Text style={styles.loginTitle}>Debes iniciar sesión para ver tu historial.</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.lightGrey }}>
@@ -77,140 +84,122 @@ const Orders = () => {
             headerTitleStyle: styles.headerTitle
           }}
         />
-        
-        <Text style={styles.mainTitle}>Transacciónes Recientes</Text>
 
-        {orders.map((order) => (
-          <View key={order.id} style={styles.orderCard}>
+        <Text style={styles.mainTitle}>Transacciones Recientes</Text>
+
+        {loading && (
+          <ActivityIndicator size="large" color={Colors.primary} style={{ marginVertical: 20 }}/>
+        )}
+
+        {!loading && orders.map(order => (
+          <TouchableOpacity
+            key={order.id}
+            style={styles.orderCard}
+            onPress={() => {
+              setSelectedOrder(order);
+              setShowDetailModal(true);
+            }}
+          >
             <View style={styles.orderHeader}>
-              <Text 
-                style={styles.eventName}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {order.event}
+              <Text style={styles.eventName} numberOfLines={1} ellipsizeMode="tail">
+                {order.listing_name}
               </Text>
-              <Text 
-                style={styles.orderPrice}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {order.price}
-              </Text>
+              <Text style={styles.orderPrice}>€{order.monto_total}</Text>
             </View>
-            
+
             <View style={styles.orderDetails}>
               <View style={styles.detailItem}>
                 <Ionicons name="calendar" size={14} color={Colors.grey} />
-                <Text style={styles.detailText}>{order.date}</Text>
+                <Text style={styles.detailText}>
+                  {order.fecha_check_in.split(' ')[0]}
+                </Text>
               </View>
-              
               <View style={styles.detailItem}>
-                <Ionicons name="location" size={14} color={Colors.grey} />
-                <Text 
-                  style={styles.detailText}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                >
-                  {order.location}
+                <Ionicons name="location-outline" size={14} color={Colors.grey} />
+                <Text style={styles.detailText} numberOfLines={1} ellipsizeMode="tail">
+                  ID Apt: {order.id_apartamento}
                 </Text>
               </View>
             </View>
 
             <View style={styles.orderFooter}>
               <View style={[
-                styles.statusBadge, 
-                { 
-                  backgroundColor: order.status === 'Finalizado' 
-                    ? Colors.lightGrey 
-                    : Colors.lightPrimary 
-                }
-              ]}>
-                <Text style={[
-                  styles.statusText,
-                  { 
-                    color: order.status === 'Finalizado' 
-                      ? Colors.grey 
-                      : Colors.primary 
-                  }
+                  styles.statusBadge,
+                  { backgroundColor: order.estado_pago === 'completado' ? Colors.lightPrimary : Colors.lightGrey }
                 ]}>
-                  {order.status}
+                <Text style={[
+                    styles.statusText,
+                    { color: order.estado_pago === 'completado' ? Colors.primary : Colors.grey }
+                  ]}>
+                  {order.estado_pago.charAt(0).toUpperCase() + order.estado_pago.slice(1)}
                 </Text>
               </View>
-              
-              <TouchableOpacity 
-                style={[
-                  styles.refundButton,
-                  !isRefundable(order.date) && styles.disabledButton
-                ]}
-                onPress={isRefundable(order.date) 
-                  ? () => {
-                      setSelectedOrder(order.id);
-                      setShowRefundModal(true);
-                    } 
-                  : undefined}
-                disabled={!isRefundable(order.date)}
-              >
-                <Text style={[
-                  styles.refundButtonText,
-                  !isRefundable(order.date) && styles.disabledText
-                ]}>
-                  {isRefundable(order.date) 
-                    ? 'Solicitar Reembolso' 
-                    : 'No disponible'}
-                </Text>
-              </TouchableOpacity>
+              <Ionicons name="chevron-forward" size={20} color={Colors.grey} />
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
-
-        <Modal visible={showRefundModal} transparent animationType="slide">
-          <TouchableWithoutFeedback 
-            onPress={() => setShowRefundModal(false)}
-            style={styles.modalOverlay}
-          >
-            <View style={styles.modalOverlay}>
-              <TouchableWithoutFeedback onPress={() => {}}>
-                <View style={styles.modalContent}>
-                  <Text style={styles.modalTitle}>Solicitud de Reembolso</Text>
-                  
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Motivo de la solicitud..."
-                    placeholderTextColor={Colors.grey}
-                    multiline
-                    numberOfLines={4}
-                    value={refundReason}
-                    onChangeText={setRefundReason}
-                  />
-                  
-                  <View style={styles.modalActions}>
-                    <TouchableOpacity 
-                      style={styles.cancelButton}
-                      onPress={() => setShowRefundModal(false)}>
-                      <Text style={styles.buttonText}>Cancelar</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity 
-                      style={styles.submitButton}
-                      onPress={handleRefundRequest}>
-                      <Text style={styles.buttonText}>Enviar Solicitud</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              </TouchableWithoutFeedback>
-            </View>
-          </TouchableWithoutFeedback>
-        </Modal>
       </ScrollView>
+
+      {/* Detalle de la orden */}
+      <Modal
+        visible={showDetailModal}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setShowDetailModal(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => setShowDetailModal(false)}>
+          <View style={styles.detailOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.detailCard}>
+                {selectedOrder && (
+                  <>
+                    <Text style={styles.detailTitle}>
+                      {selectedOrder.listing_name}
+                    </Text>
+                    <Image
+                      source={{ uri: selectedOrder.listing_miniatura }}
+                      style={styles.detailImage}
+                    />
+                    <Text style={styles.detailLabel}>
+                      Check-in: {selectedOrder.fecha_check_in.replace('T', ' ').substring(0,16)}
+                    </Text>
+                    <Text style={styles.detailLabel}>
+                      Check-out: {selectedOrder.fecha_check_out.replace('T', ' ').substring(0,16)}
+                    </Text>
+                    <Text style={styles.detailLabel}>
+                      Huésped: {selectedOrder.nombre_apellido}
+                    </Text>
+                    <Text style={styles.detailLabel}>
+                      Teléfono: {selectedOrder.telefono}
+                    </Text>
+                    {selectedOrder.notas_adicionales ? (
+                      <Text style={styles.detailLabel}>
+                        Notas: {selectedOrder.notas_adicionales}
+                      </Text>
+                    ) : null}
+                    <Text style={styles.detailLabel}>
+                      Monto: €{selectedOrder.monto_total}
+                    </Text>
+                    <TouchableOpacity
+                      style={styles.closeButton}
+                      onPress={() => setShowDetailModal(false)}
+                    >
+                      <Text style={styles.closeButtonText}>Cerrar</Text>
+                    </TouchableOpacity>
+                  </>
+                )}
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    paddingRight : 16,
-    paddingLeft: 16,
+    paddingHorizontal: 16,
     paddingBottom: 20,
     gap: 12
   },
@@ -241,37 +230,32 @@ const styles = StyleSheet.create({
     fontFamily: 'mon-sb',
     fontSize: 14,
     color: Colors.dark,
-    flex: 1,
-    marginRight: 8
+    flex: 1
   },
   orderPrice: {
     fontFamily: 'mon-b',
     fontSize: 14,
-    color: Colors.primary,
-    maxWidth: '40%'
+    color: Colors.primary
   },
   orderDetails: {
-    gap: 8,
+    flexDirection: 'row',
+    gap: 16,
     marginBottom: 12
   },
   detailItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    flex: 1
+    gap: 6
   },
   detailText: {
     fontFamily: 'mon',
     fontSize: 12,
-    color: Colors.grey,
-    flexShrink: 1,
-    maxWidth: '85%'
+    color: Colors.grey
   },
   orderFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 8
+    alignItems: 'center'
   },
   statusBadge: {
     borderRadius: 6,
@@ -282,76 +266,64 @@ const styles = StyleSheet.create({
     fontFamily: 'mon-sb',
     fontSize: 12,
   },
-  refundButton: {
-    backgroundColor: Colors.lightPrimary,
-    borderRadius: 6,
-    paddingVertical: 6,
-    paddingHorizontal: 12
-  },
-  refundButtonText: {
-    fontFamily: 'mon-sb',
-    color: Colors.primary,
-    fontSize: 12
-  },
-  modalOverlay: {
+  // detalle modal
+  detailOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'center',
-    padding: 16,
     alignItems: 'center',
+    padding: 16
   },
-  modalContent: {
+  detailCard: {
+    width: '100%',
     backgroundColor: '#fff',
     borderRadius: 12,
-    padding: 16,
-    width: '100%',
+    padding: 20
   },
-  modalTitle: {
+  detailTitle: {
     fontFamily: 'mon-b',
     fontSize: 18,
-    color: Colors.dark,
+    marginBottom: 12,
+    textAlign: 'center'
+  },
+  detailImage: {
+    width: '100%',
+    height: 150,
+    borderRadius: 8,
     marginBottom: 12
   },
-  input: {
-    borderWidth: 1,
-    borderColor: Colors.grey,
-    borderRadius: 6,
-    padding: 10,
-    minHeight: 80,
-    textAlignVertical: 'top',
-    marginBottom: 16,
-    fontSize: 14
+  detailLabel: {
+    fontFamily: 'mon',
+    fontSize: 14,
+    color: Colors.dark,
+    marginBottom: 6
   },
-  modalActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 8
-  },
-  cancelButton: {
-    backgroundColor: Colors.lightGrey,
-    borderRadius: 6,
-    padding: 10
-  },
-  submitButton: {
+  closeButton: {
     backgroundColor: Colors.primary,
     borderRadius: 6,
-    padding: 10
+    padding: 12,
+    marginTop: 16,
+    alignItems: 'center'
   },
-  buttonText: {
-    fontFamily: 'mon-sb',
+  closeButtonText: {
     color: '#fff',
+    fontFamily: 'mon-b',
     fontSize: 14
+  },
+  loginOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: Colors.lightGrey
+  },
+  loginTitle: {
+    fontFamily: 'mon-b',
+    fontSize: 18,
+    color: Colors.dark
   },
   headerTitle: {
     fontFamily: 'mon-b',
     fontSize: 18
-  },
-  disabledButton: {
-    backgroundColor: Colors.lightGrey,
-    opacity: 0.7
-  },
-  disabledText: {
-    color: Colors.grey
   }
 });
 
