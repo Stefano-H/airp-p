@@ -403,6 +403,50 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.grey,
   },
+  successOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  successCard: {
+    width: '80%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 24,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 12,
+  },
+  successTitle: {
+    fontSize: 20,
+    fontFamily: 'mon-b',
+    color: Colors.primary,
+    marginTop: 12,
+    marginBottom: 8,
+  },
+  successMessage: {
+    fontSize: 16,
+    fontFamily: 'mon',
+    color: Colors.dark,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  successButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+  },
+  successButtonText: {
+    color: '#fff',
+    fontFamily: 'mon-b',
+    fontSize: 16,
+  },
+
 });
 
 export default Page;

@@ -10,13 +10,12 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-  Button,
 } from 'react-native';
 import { Calendar, DateObject } from 'react-native-calendars';
 import axios from 'axios';
 import Colors from '@/constants/Colors';
 import { format } from 'date-fns';
-import { useUser, useAuth } from '@clerk/clerk-expo';
+import { useUser } from '@clerk/clerk-expo';
 import { Ionicons } from '@expo/vector-icons';
 import API_BASE_URL from '@/utils/apiConfig';
 import { useRouter } from 'expo-router';
@@ -28,12 +27,32 @@ interface AvailabilityModalProps {
   pricePerNight: number;
 }
 
-// Modal que simula tu propia pasarela de pago
-const PaymentGatewayModal = ({
+// Modal de confirmación profesional
+const PaymentSuccessModal = ({
   visible,
   onClose,
-  onSubmit,
 }: {
+  visible: boolean;
+  onClose: () => void;
+}) => (
+  <Modal transparent visible={visible} animationType="fade">
+    <View style={styles.successOverlay}>
+      <View style={styles.successCard}>
+        <Ionicons name="checkmark-circle-outline" size={48} color={Colors.primary} />
+        <Text style={styles.successTitle}>¡Pago Confirmado!</Text>
+        <Text style={styles.successMessage}>
+          Tu reserva se ha procesado correctamente.
+        </Text>
+        <TouchableOpacity style={styles.successButton} onPress={onClose}>
+          <Text style={styles.successButtonText}>Cerrar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </Modal>
+);
+
+// Modal que simula tu propia pasarela de pago
+const PaymentGatewayModal = (props: {
   visible: boolean;
   onClose: () => void;
   onSubmit: (card: {
@@ -43,6 +62,7 @@ const PaymentGatewayModal = ({
     cvc: string;
   }) => void;
 }) => {
+  const { visible, onClose, onSubmit } = props;
   const [cardNumber, setCardNumber] = useState('');
   const [expMonth, setExpMonth] = useState('');
   const [expYear, setExpYear] = useState('');
@@ -91,13 +111,9 @@ const PaymentGatewayModal = ({
           />
 
           <View style={styles.buttonRow}>
-            <TouchableOpacity
-              style={[styles.button, styles.cancelBtn]}
-              onPress={onClose}
-            >
+            <TouchableOpacity style={[styles.button, styles.cancelBtn]} onPress={onClose}>
               <Text style={styles.cancelText}>Cancelar</Text>
             </TouchableOpacity>
-
             <TouchableOpacity
               style={[styles.button, styles.payBtn]}
               onPress={() =>
@@ -132,21 +148,18 @@ const AvailabilityModal = ({
   const [isCheckIn, setIsCheckIn] = useState(true);
   const [checkInDate, setCheckInDate] = useState('');
   const [checkOutDate, setCheckOutDate] = useState('');
-  const [checkInTime, setCheckInTime] = useState({ hour: '14', minute: '00' });
-  const [checkOutTime, setCheckOutTime] = useState({ hour: '12', minute: '00' });
+  const [checkInTime] = useState({ hour: '14', minute: '00' });
+  const [checkOutTime] = useState({ hour: '12', minute: '00' });
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
   const [showGateway, setShowGateway] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
-  // if (!isLoaded || !isSignedIn || !user) {
-  //   return null; 
-  // }
-  if (!isLoaded) {
-    return null;
-  }
+  if (!isLoaded) return null;
+
   if (!isSignedIn || !user) {
     return (
       <Modal transparent visible={visible} animationType="fade">
@@ -164,10 +177,7 @@ const AvailabilityModal = ({
               >
                 <Text style={styles.loginBtnText}>Iniciar Sesión</Text>
               </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.button, styles.cancelBtn]}
-                onPress={onClose}
-              >
+              <TouchableOpacity style={[styles.button, styles.cancelBtn]} onPress={onClose}>
                 <Text style={styles.cancelText}>Cerrar</Text>
               </TouchableOpacity>
             </View>
@@ -177,29 +187,33 @@ const AvailabilityModal = ({
     );
   }
 
+  // ocultar success + availability al cerrar
+  const closeSuccess = () => {
+    setShowSuccess(false);
+    onClose();
+  };
+
   useEffect(() => {
     if (checkInDate && checkOutDate) {
       const start = new Date(checkInDate);
       const end = new Date(checkOutDate);
-      const dayDifference = Math.ceil(
-        (end.getTime() - start.getTime()) / (1000 * 3600 * 24)
-      );
-      setTotalAmount(dayDifference * pricePerNight);
+      const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 3600 * 24));
+      setTotalAmount(days * pricePerNight);
     }
   }, [checkInDate, checkOutDate, pricePerNight]);
 
   useEffect(() => {
     const fetchAvailability = async () => {
       try {
-        const response = await axios.get(`${API_BASE_URL}/getNotAvailability`, {
+        const resp = await axios.get(`${API_BASE_URL}/getNotAvailability`, {
           params: { id: listingId },
         });
-        let availability = Array.isArray(response.data) ? response.data : [];
-        const newDates = availability.reduce((acc: any, date: string) => {
-          acc[date] = { disabled: true, disableTouchEvent: true, color: Colors.grey };
+        const dates = Array.isArray(resp.data) ? resp.data : [];
+        const marked = dates.reduce((acc: any, d: string) => {
+          acc[d] = { disabled: true, disableTouchEvent: true, color: Colors.grey };
           return acc;
         }, {});
-        setSelectedDates(newDates);
+        setSelectedDates(marked);
       } catch {
         setSelectedDates({});
       }
@@ -207,24 +221,20 @@ const AvailabilityModal = ({
     if (visible) fetchAvailability();
   }, [visible, listingId]);
 
-  const validateFields = () => {
+  const validate = () => {
     if (!checkInDate || !checkOutDate) {
-      Alert.alert('Error', 'Selecciona check-in y check-out');
+      Alert.alert('Error', 'Selecciona fechas');
       return false;
     }
-    if (!fullName.trim()) {
-      Alert.alert('Error', 'Ingresa tu nombre completo');
-      return false;
-    }
-    if (!phone.trim()) {
-      Alert.alert('Error', 'Ingresa un teléfono válido');
+    if (!fullName.trim() || !phone.trim()) {
+      Alert.alert('Error', 'Ingresa nombre y teléfono');
       return false;
     }
     return true;
   };
 
   const handlePayment = () => {
-    if (!validateFields()) return;
+    if (!validate()) return;
     setShowGateway(true);
   };
 
@@ -240,11 +250,9 @@ const AvailabilityModal = ({
       const resp = await axios.post(`${API_BASE_URL}/mock-payment`, {
         ...card,
         amount: totalAmount * 100,
-        metadata: { listingId, userId: user?.id, checkInDate, checkOutDate },
+        metadata: { listingId, userId: user.id, checkInDate, checkOutDate },
       });
-      if (resp.data.status !== 'approved') {
-        throw new Error(resp.data.error || 'Pago rechazado');
-      }
+      if (resp.data.status !== 'approved') throw new Error('Pago rechazado');
 
       await axios.post(`${API_BASE_URL}/ordenes`, {
         id_clerk_cliente: user.id,
@@ -261,11 +269,9 @@ const AvailabilityModal = ({
         metodo_pago: 'mock',
       });
 
-    //   router.push('/reserva-confirmada');
-    
-      onClose();
-    } catch (e: any) {
-      Alert.alert('Error en pago', e.message);
+      setShowSuccess(true);
+    } catch (err: any) {
+      Alert.alert('Error en pago', err.message);
     } finally {
       setLoading(false);
     }
@@ -278,68 +284,54 @@ const AvailabilityModal = ({
         onClose={() => setShowGateway(false)}
         onSubmit={onGatewaySubmit}
       />
+      <PaymentSuccessModal visible={showSuccess} onClose={closeSuccess} />
 
-      <Modal
-        animationType="slide"
-        transparent
-        visible={visible && !showGateway}
-        onRequestClose={onClose}
-      >
+      <Modal transparent visible={visible && !showGateway && !showSuccess} animationType="slide">
         <SafeAreaView style={styles.safeArea}>
           <ScrollView contentContainerStyle={styles.scrollViewContent}>
             <View style={styles.modalContent}>
               <Text style={styles.title}>Completar Reserva</Text>
 
+              {/* fechas */}
               <View style={styles.dateSection}>
                 <TouchableOpacity
                   style={styles.dateInput}
-                  onPress={() => {
-                    setIsCheckIn(true);
-                    setShowCalendar(true);
-                  }}
+                  onPress={() => { setIsCheckIn(true); setShowCalendar(true); }}
                 >
                   <Ionicons name="calendar" size={20} color={Colors.grey} />
-                  <Text style={styles.dateText}>{checkInDate || 'Seleccionar Check-in'}</Text>
+                  <Text style={styles.dateText}>{checkInDate || 'Check-in'}</Text>
                 </TouchableOpacity>
-
                 <TouchableOpacity
                   style={styles.dateInput}
-                  onPress={() => {
-                    setIsCheckIn(false);
-                    setShowCalendar(true);
-                  }}
+                  onPress={() => { setIsCheckIn(false); setShowCalendar(true); }}
                 >
                   <Ionicons name="calendar" size={20} color={Colors.grey} />
-                  <Text style={styles.dateText}>{checkOutDate || 'Seleccionar Check-out'}</Text>
+                  <Text style={styles.dateText}>{checkOutDate || 'Check-out'}</Text>
                 </TouchableOpacity>
               </View>
-
               {showCalendar && (
                 <Calendar
                   onDayPress={({ dateString }) => {
-                    if (selectedDates[dateString]?.disabled) return;
                     setSelectedDates(prev => {
-                      const next = { ...prev };
+                      const nxt = { ...prev };
                       if (isCheckIn) {
-                        if (checkInDate) delete next[checkInDate];
+                        if (checkInDate) delete nxt[checkInDate];
                         setCheckInDate(dateString);
                       } else {
-                        if (checkOutDate) delete next[checkOutDate];
+                        if (checkOutDate) delete nxt[checkOutDate];
                         setCheckOutDate(dateString);
                       }
-                      next[dateString] = { selected: true, selectedColor: Colors.primary };
-                      return next;
+                      nxt[dateString] = { selected: true, selectedColor: Colors.primary };
+                      return nxt;
                     });
                   }}
                   markedDates={selectedDates}
                   minDate={format(new Date(), 'yyyy-MM-dd')}
-                  theme={{
-                    todayTextColor: Colors.primary,
-                    selectedDayBackgroundColor: Colors.primary,
-                  }}
+                  theme={{ todayTextColor: Colors.primary }}
                 />
               )}
 
+              {/* datos usuario */}
               <Text style={styles.sectionTitle}>Tus Datos</Text>
               <View style={styles.inputGroup}>
                 <Ionicons name="person" size={20} color={Colors.grey} />
@@ -350,7 +342,6 @@ const AvailabilityModal = ({
                   onChangeText={setFullName}
                 />
               </View>
-
               <View style={styles.inputGroup}>
                 <Ionicons name="call" size={20} color={Colors.grey} />
                 <TextInput
@@ -362,7 +353,8 @@ const AvailabilityModal = ({
                 />
               </View>
 
-              <Text style={styles.sectionTitle}>Resumen del Pago</Text>
+              {/* resumen */}
+              <Text style={styles.sectionTitle}>Resumen</Text>
               <View style={styles.paymentSummary}>
                 <View style={styles.summaryRow}>
                   <Text style={styles.summaryLabel}>{pricePerNight}€ x noche</Text>
@@ -372,34 +364,18 @@ const AvailabilityModal = ({
                   <Text style={styles.summaryLabel}>Noches:</Text>
                   <Text style={styles.summaryValue}>
                     {Math.ceil(
-                      (new Date(checkOutDate).getTime() -
-                        new Date(checkInDate).getTime()) /
-                        (1000 * 3600 * 24)
+                      (new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) /
+                      (1000 * 3600 * 24)
                     )}
                   </Text>
                 </View>
               </View>
 
-              <TouchableOpacity
-                style={styles.payButton}
-                onPress={handlePayment}
-                disabled={loading}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <>
-                    <Ionicons name="lock-closed" size={18} color="#fff" />
-                    <Text style={styles.payButtonText}>Pagar Ahora</Text>
-                  </>
-                )}
+              {/* botones */}
+              <TouchableOpacity style={styles.payButton} onPress={handlePayment} disabled={loading}>
+                {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.payButtonText}>Pagar Ahora</Text>}
               </TouchableOpacity>
-
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={onClose}
-                disabled={loading}
-              >
+              <TouchableOpacity style={styles.cancelButton} onPress={onClose} disabled={loading}>
                 <Text style={styles.cancelButtonText}>Cancelar</Text>
               </TouchableOpacity>
             </View>
@@ -411,266 +387,61 @@ const AvailabilityModal = ({
 };
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-      },
-      scrollViewContent: {
-        flexGrow: 1,
-        justifyContent: 'center',
-      },
-      modalContent: {
-        backgroundColor: '#fff',
-        borderRadius: 20,
-        padding: 20,
-        marginHorizontal: 20,
-      },
-      title: {
-        fontSize: 22,
-        fontFamily: 'mon-b',
-        textAlign: 'center',
-        marginBottom: 20,
-      },
-      gateway: {
-        width: '90%',             // ahora ocupa el 90% del ancho de pantalla
-        maxWidth: 400,            // y no supere 400px
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 20,
-      },
-      marginRight: {
-        marginRight: 10,          // espaciado entre MM y YYYY
-      },
-      input: {
-        fontFamily: 'mon',
-        fontSize: 16,
-        borderWidth: 1,
-        borderColor: Colors.lightGrey,
-        borderRadius: 8,
-        padding: 10,
-        backgroundColor: '#fff',
-        marginBottom: 15,
-      },
-      payButton: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: Colors.primary,
-        borderRadius: 10,
-        padding: 15,
-        marginTop: 20,
-      },
-      payButtonText: {
-        color: '#fff',
-        fontFamily: 'mon-b',
-        fontSize: 16,
-      },
-    dateSection: {
-      gap: 10,
-      marginBottom: 20,
-    },
-    dateInput: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: Colors.grey,
-      borderRadius: 10,
-      padding: 15,
-      gap: 10,
-    },
-    dateText: {
-      fontFamily: 'mon',
-      color: Colors.dark,
-    },
-    sectionTitle: {
-      fontFamily: 'mon-sb',
-      fontSize: 16,
-      color: Colors.dark,
-      marginVertical: 15,
-    },
-    inputGroup: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      borderWidth: 1,
-      borderColor: Colors.grey,
-      borderRadius: 10,
-      padding: 15,
-      gap: 10,
-      marginBottom: 15,
-    },
-    paymentSummary: {
-      backgroundColor: Colors.lightGrey,
-      borderRadius: 10,
-      padding: 15,
-      marginVertical: 10,
-    },
-    summaryRow: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: 5,
-    },
-    summaryLabel: {
-      fontFamily: 'mon',
-      color: Colors.grey,
-    },
-    summaryValue: {
-      fontFamily: 'mon-b',
-      color: Colors.dark,
-    },
-    cancelButton: {
-      borderWidth: 1,
-      borderColor: Colors.grey,
-      borderRadius: 10,
-      padding: 15,
-      alignItems: 'center',
-      marginTop: 10,
-    },
-    cancelButtonText: {
-      color: Colors.dark,
-      fontFamily: 'mon-sb',
-    },
-    gatewayOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        justifyContent: 'center',
-        alignItems: 'center',
-      },
-      gatewayCard: {
-        width: '85%',
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 20,
-        // sombra iOS
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
-        // elevación Android
-        elevation: 10,
-      },
-      gatewayTitle: {
-        fontSize: 18,
-        fontFamily: 'mon-b',
-        textAlign: 'center',
-        marginBottom: 20,
-        color: Colors.primary,
-      },
-      gatewayInput: {
-        fontFamily: 'mon',
-        fontSize: 16,
-        borderWidth: 1,
-        borderColor: Colors.lightGrey,
-        borderRadius: 8,
-        paddingVertical: 12,
-        paddingHorizontal: 15,
-        backgroundColor: '#fafafa',
-        marginBottom: 15,
-      },
-      row: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-      },
-      halfInput: {
-        flex: 1,
-        marginRight: 10,
-      },
-      cvcInput: {
-        width: 100,
-      },
-      buttonRow: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        marginTop: 10,
-      },
-      button: {
-        borderRadius: 8,
-        paddingVertical: 12,
-        paddingHorizontal: 20,
-        marginLeft: 10,
-      },
-      payBtn: {
-        backgroundColor: Colors.primary,
-      },
-      payText: {
-        color: '#fff',
-        fontFamily: 'mon-b',
-      },
-      loginBox: {
-        width: '80%',
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 20,
-        alignItems: 'center',
-        elevation: 10,
-      },
-      loginText: {
-        fontSize: 18,
-        fontFamily: 'mon-sb',
-        marginBottom: 20,
-        textAlign: 'center',
-      },
-      loginOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        justifyContent: 'center',
-        alignItems: 'center',
-      },
-      loginCard: {
-        width: '80%',
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        padding: 25,
-        alignItems: 'center',
-        // sombra iOS
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
-        // elevación Android
-        elevation: 12,
-      },
-      loginTitle: {
-        fontSize: 20,
-        fontFamily: 'mon-b',
-        color: Colors.primary,
-        marginTop: 10,
-        marginBottom: 10,
-      },
-      loginMessage: {
-        fontSize: 16,
-        fontFamily: 'mon',
-        color: Colors.dark,
-        textAlign: 'center',
-        marginBottom: 20,
-      },
-      loginButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-      },
-      loginBtn: {
-        flex: 1,
-        backgroundColor: Colors.primary,
-        marginRight: 10,
-      },
-      loginBtnText: {
-        color: '#fff',
-        fontFamily: 'mon-b',
-        textAlign: 'center',
-        paddingVertical: 12,
-      },
-      cancelBtn: {
-        flex: 1,
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: Colors.grey,
-      },
-      cancelText: {
-        color: Colors.dark,
-        fontFamily: 'mon-sb',
-        textAlign: 'center',
-        paddingVertical: 12,
-      },            
-  });
-  
+  safeArea: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
+  scrollViewContent: { flexGrow: 1, justifyContent: 'center' },
+  modalContent: { backgroundColor: '#fff', borderRadius: 20, padding: 20, margin: 20 },
+  title: { fontSize: 22, fontFamily: 'mon-b', textAlign: 'center', marginBottom: 20 },
+
+  // date
+  dateSection: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  dateInput: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: Colors.grey, borderRadius: 8, padding: 10, flex: 1, marginHorizontal: 5 },
+  dateText: { fontFamily: 'mon', color: Colors.dark, marginLeft: 8 },
+
+  sectionTitle: { fontFamily: 'mon-sb', fontSize: 16, color: Colors.dark, marginTop: 20, marginBottom: 10 },
+  inputGroup: { flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: Colors.grey, borderRadius: 8, padding: 10, marginBottom: 15 },
+  input: { flex: 1, fontFamily: 'mon', fontSize: 16, padding: 8 },
+
+  paymentSummary: { backgroundColor: Colors.lightGrey, borderRadius: 8, padding: 10, marginVertical: 10 },
+  summaryRow: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 5 },
+  summaryLabel: { fontFamily: 'mon', color: Colors.grey },
+  summaryValue: { fontFamily: 'mon-b', color: Colors.dark },
+
+  payButton: { backgroundColor: Colors.primary, borderRadius: 8, padding: 15, alignItems: 'center', marginTop: 10 },
+  payButtonText: { color: '#fff', fontFamily: 'mon-b', fontSize: 16 },
+  cancelButton: { borderWidth: 1, borderColor: Colors.grey, borderRadius: 8, padding: 15, alignItems: 'center', marginTop: 10 },
+  cancelButtonText: { color: Colors.dark, fontFamily: 'mon-sb' },
+
+  // gateway
+  gatewayOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
+  gatewayCard: { width: '85%', backgroundColor: '#fff', borderRadius: 12, padding: 20, elevation: 10 },
+  gatewayTitle: { fontSize: 18, fontFamily: 'mon-b', color: Colors.primary, textAlign: 'center', marginBottom: 15 },
+  gatewayInput: { fontFamily: 'mon', fontSize: 16, borderWidth: 1, borderColor: Colors.lightGrey, borderRadius: 6, padding: 10, backgroundColor: '#fafafa', marginBottom: 10 },
+  row: { flexDirection: 'row', justifyContent: 'space-between' },
+  halfInput: { flex: 1, marginHorizontal: 5 },
+  cvcInput: { width: 100 },
+  buttonRow: { flexDirection: 'row', justifyContent: 'flex-end', marginTop: 10 },
+  button: { borderRadius: 6, paddingVertical: 10, paddingHorizontal: 15, marginLeft: 10 },
+  cancelBtn: { backgroundColor: '#fff', borderWidth: 1, borderColor: Colors.grey },
+  payBtn: { backgroundColor: Colors.primary },
+  cancelText: { color: Colors.dark, fontFamily: 'mon-sb', textAlign: 'center' },
+  payText: { color: '#fff', fontFamily: 'mon-b', textAlign: 'center' },
+
+  // success modal
+  successOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
+  successCard: { width: '80%', backgroundColor: '#fff', borderRadius: 12, padding: 24, alignItems: 'center', elevation: 12 },
+  successTitle: { fontSize: 20, fontFamily: 'mon-b', color: Colors.primary, marginVertical: 8 },
+  successMessage: { fontSize: 16, fontFamily: 'mon', color: Colors.dark, textAlign: 'center', marginBottom: 20 },
+  successButton: { backgroundColor: Colors.primary, borderRadius: 6, paddingVertical: 12, paddingHorizontal: 30 },
+  successButtonText: { color: '#fff', fontFamily: 'mon-b', fontSize: 16 },
+
+  // login overlay
+  loginOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
+  loginCard: { width: '80%', backgroundColor: '#fff', borderRadius: 12, padding: 25, alignItems: 'center', elevation: 12 },
+  loginTitle: { fontSize: 20, fontFamily: 'mon-b', color: Colors.primary, marginBottom: 10 },
+  loginMessage: { fontSize: 16, fontFamily: 'mon', color: Colors.dark, textAlign: 'center', marginBottom: 20 },
+  loginButtons: { flexDirection: 'row', width: '100%', justifyContent: 'space-between' },
+  loginBtn: { flex: 1, backgroundColor: Colors.primary, marginRight: 10 },
+  loginBtnText: { color: '#fff', fontFamily: 'mon-b', textAlign: 'center', paddingVertical: 10 },
+});
+
 export default AvailabilityModal;
