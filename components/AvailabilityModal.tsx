@@ -141,8 +141,40 @@ const AvailabilityModal = ({
   const [totalAmount, setTotalAmount] = useState(0);
   const [showGateway, setShowGateway] = useState(false);
 
-  if (!isLoaded || !isSignedIn || !user) {
-    return null; // o un spinner
+  // if (!isLoaded || !isSignedIn || !user) {
+  //   return null; 
+  // }
+  if (!isLoaded) {
+    return null;
+  }
+  if (!isSignedIn || !user) {
+    return (
+      <Modal transparent visible={visible} animationType="fade">
+        <View style={styles.loginOverlay}>
+          <View style={styles.loginCard}>
+            <Ionicons name="alert-circle-outline" size={36} color={Colors.primary} />
+            <Text style={styles.loginTitle}>Acceso Restringido</Text>
+            <Text style={styles.loginMessage}>
+              Para solicitar una reserva debes iniciar sesión.
+            </Text>
+            <View style={styles.loginButtons}>
+              <TouchableOpacity
+                style={[styles.button, styles.loginBtn]}
+                onPress={() => router.push('/login')}
+              >
+                <Text style={styles.loginBtnText}>Iniciar Sesión</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.button, styles.cancelBtn]}
+                onPress={onClose}
+              >
+                <Text style={styles.cancelText}>Cerrar</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
   }
 
   useEffect(() => {
@@ -556,22 +588,89 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         marginLeft: 10,
       },
-      cancelBtn: {
-        backgroundColor: '#fff',
-        borderWidth: 1,
-        borderColor: Colors.grey,
-      },
       payBtn: {
         backgroundColor: Colors.primary,
-      },
-      cancelText: {
-        color: Colors.dark,
-        fontFamily: 'mon-sb',
       },
       payText: {
         color: '#fff',
         fontFamily: 'mon-b',
-      },      
+      },
+      loginBox: {
+        width: '80%',
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 20,
+        alignItems: 'center',
+        elevation: 10,
+      },
+      loginText: {
+        fontSize: 18,
+        fontFamily: 'mon-sb',
+        marginBottom: 20,
+        textAlign: 'center',
+      },
+      loginOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.6)',
+        justifyContent: 'center',
+        alignItems: 'center',
+      },
+      loginCard: {
+        width: '80%',
+        backgroundColor: '#fff',
+        borderRadius: 12,
+        padding: 25,
+        alignItems: 'center',
+        // sombra iOS
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
+        // elevación Android
+        elevation: 12,
+      },
+      loginTitle: {
+        fontSize: 20,
+        fontFamily: 'mon-b',
+        color: Colors.primary,
+        marginTop: 10,
+        marginBottom: 10,
+      },
+      loginMessage: {
+        fontSize: 16,
+        fontFamily: 'mon',
+        color: Colors.dark,
+        textAlign: 'center',
+        marginBottom: 20,
+      },
+      loginButtons: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+      },
+      loginBtn: {
+        flex: 1,
+        backgroundColor: Colors.primary,
+        marginRight: 10,
+      },
+      loginBtnText: {
+        color: '#fff',
+        fontFamily: 'mon-b',
+        textAlign: 'center',
+        paddingVertical: 12,
+      },
+      cancelBtn: {
+        flex: 1,
+        backgroundColor: '#fff',
+        borderWidth: 1,
+        borderColor: Colors.grey,
+      },
+      cancelText: {
+        color: Colors.dark,
+        fontFamily: 'mon-sb',
+        textAlign: 'center',
+        paddingVertical: 12,
+      },            
   });
   
 export default AvailabilityModal;
