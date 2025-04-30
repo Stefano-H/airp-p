@@ -7,20 +7,18 @@ import {
   Image,
   ActivityIndicator,
   FlatList,
-  ListRenderItem,
 } from 'react-native';
 import { TextInput, TouchableOpacity } from 'react-native-gesture-handler';
-import Animated, { FadeIn, FadeOut, SlideInDown } from 'react-native-reanimated';
+import Animated from 'react-native-reanimated';
+import { FadeIn, FadeOut, SlideInDown } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import DatePicker from 'react-native-modern-datepicker';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Colors from '@/constants/Colors';
 import { defaultStyles } from '@/constants/Styles';
 import API_BASE_URL from '@/utils/apiConfig';
-import { router, useRouter } from 'expo-router';
-import { Listing } from '@/interfaces/listing';
 
-const guestsGroups = [
+const guestsGroupsInitial = [
   { name: 'Adultos', text: 'Edades 13 o más', count: 0 },
   { name: 'Niños', text: 'Edades 2-12', count: 0 },
   { name: 'Bebés', text: 'Menores de 2', count: 0 },
@@ -33,7 +31,7 @@ const Page = () => {
   const [openCard, setOpenCard] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [selectedDate, setSelectedDate] = useState<string>(today);
-  const [groups, setGroups] = useState(guestsGroups);
+  const [groups, setGroups] = useState(guestsGroupsInitial);
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -44,23 +42,25 @@ const Page = () => {
   const clearAll = () => {
     setSearchTerm('');
     setSelectedDate(today);
-    setGroups(guestsGroups);
+    setGroups(guestsGroupsInitial);
     setListings([]);
     setOpenCard(null);
   };
 
   const searchListings = async () => {
-    if (!searchTerm.trim()) return; // Evita búsquedas vacías
+    if (!searchTerm.trim()) return; // evita búsquedas vacías
+
+    const totalGuests = groups.reduce((sum, g) => sum + g.count, 0);
+
     setLoading(true);
     try {
-      // Actualiza la URL con la dirección IP de tu servidor si es necesario
       const response = await fetch(
-        `${API_BASE_URL}/api/search-listings?destino=${encodeURIComponent(searchTerm)}`
+        `${API_BASE_URL}/api/search-listings?destino=${encodeURIComponent(
+          searchTerm
+        )}&guests=${totalGuests}`
       );
       const data = await response.json();
       setListings(data);
-      // router.push(`/filtered-listings?destino=${encodeURIComponent(searchTerm)}`);
-      // router.push(`/(pages)/FilteredListings?destino=${encodeURIComponent(searchTerm)}`);
     } catch (error) {
       console.error('Error al buscar listings:', error);
     }
@@ -76,36 +76,36 @@ const Page = () => {
           {item.ciudad} - {item.distrito}
         </Text>
         <Text style={styles.listingPrice}>${item.price}</Text>
+        <Text style={styles.listingGuests}>
+          Invitados max: {item.invitados_incluidos}
+        </Text>
       </View>
     </View>
   );
 
-  const renderRow: ListRenderItem<Listing> = ({ item }) => {
-    console.log('📌 Renderizando apartamento:', item);
-  
-    return (
-      <View style={styles.listing}>
-        <Text>{item.nombre || 'Sin nombre'}</Text>
-        <Image source={{ uri: item.miniatura || 'URL_FALLBACK' }} style={styles.image} />
-      </View>
-    );
-  };
-  
-
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={[styles.scrollViewContent, { paddingBottom: 100 }]}>
+      <ScrollView
+        contentContainerStyle={[styles.scrollViewContent, { paddingBottom: 100 }]}
+      >
         <View style={styles.container}>
-          {/* Sección "Donde" */}
+          {/* Sección "Dónde" */}
           <View style={styles.card}>
             <TouchableOpacity onPress={() => toggleCard(0)} style={styles.cardPreview}>
-              <Text style={styles.previewText}>Donde</Text>
-              <Text style={styles.previewdDate}>{searchTerm || 'Ingresa destino'}</Text>
+              <Text style={styles.previewText}>Dónde</Text>
+              <Text style={styles.previewdDate}>
+                {searchTerm || 'Ingresa destino'}
+              </Text>
             </TouchableOpacity>
             {openCard === 0 && (
               <View style={styles.cardBody}>
                 <View style={styles.searchSection}>
-                  <Ionicons style={styles.searchIcon} name="search-outline" size={20} color="#000" />
+                  <Ionicons
+                    style={styles.searchIcon}
+                    name="search-outline"
+                    size={20}
+                    color="#000"
+                  />
                   <TextInput
                     style={styles.inputField}
                     placeholder="Buscar por ciudad"
@@ -118,11 +118,13 @@ const Page = () => {
             )}
           </View>
 
-          {/* Sección "Cuando" */}
+          {/* Sección "Cuándo" */}
           <View style={styles.card}>
             <TouchableOpacity onPress={() => toggleCard(1)} style={styles.cardPreview}>
-              <Text style={styles.previewText}>Cuando</Text>
-              <Text style={styles.previewdDate}>{selectedDate || 'Selecciona fecha'}</Text>
+              <Text style={styles.previewText}>Cuándo</Text>
+              <Text style={styles.previewdDate}>
+                {selectedDate || 'Selecciona fecha'}
+              </Text>
             </TouchableOpacity>
             {openCard === 1 && (
               <View style={styles.cardBody}>
@@ -159,14 +161,12 @@ const Page = () => {
                     key={index}
                     style={[
                       styles.guestItem,
-                      index + 1 < guestsGroups.length ? styles.itemBorder : null,
+                      index + 1 < groups.length ? styles.itemBorder : null,
                     ]}
                   >
                     <View>
-                      <Text style={{ fontFamily: 'mon-sb', fontSize: 14 }}>{item.name}</Text>
-                      <Text style={{ fontFamily: 'mon', fontSize: 14, color: Colors.grey }}>
-                        {item.text}
-                      </Text>
+                      <Text style={styles.guestName}>{item.name}</Text>
+                      <Text style={styles.guestText}>{item.text}</Text>
                     </View>
                     <View style={styles.counterContainer}>
                       <TouchableOpacity
@@ -180,7 +180,7 @@ const Page = () => {
                         <Ionicons
                           name="remove-circle-outline"
                           size={26}
-                          color={groups[index].count > 0 ? Colors.grey : '#cdcdcd'}
+                          color={item.count > 0 ? Colors.grey : '#cdcdcd'}
                         />
                       </TouchableOpacity>
                       <Text style={styles.counterText}>{item.count}</Text>
@@ -200,7 +200,7 @@ const Page = () => {
             )}
           </View>
 
-          {/* Resultados de la búsqueda */}
+          {/* Resultados */}
           {loading ? (
             <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 20 }} />
           ) : listings.length > 0 ? (
@@ -213,22 +213,30 @@ const Page = () => {
           ) : (
             !loading &&
             searchTerm.trim() !== '' && (
-              <Text style={styles.noResults}>No se encontraron resultados para "{searchTerm}"</Text>
+              <Text style={styles.noResults}>
+                No se encontraron resultados para "{searchTerm}"
+              </Text>
             )
           )}
         </View>
-          {/* Botones de acción */}
-          <Animated.View style={defaultStyles.footer} entering={SlideInDown.delay(200)}>
-            <View style={styles.footerContainer}>
-              <TouchableOpacity onPress={clearAll} style={styles.clearButton}>
-                <Text style={styles.clearText}>Borrar todo</Text>
-              </TouchableOpacity>
-              <TouchableOpacity onPress={searchListings} style={styles.searchButton}>
-                <Ionicons name="search-outline" size={24} color="#fff" style={defaultStyles.btnIcon} />
-                <Text style={defaultStyles.btnText}>Buscar</Text>
-              </TouchableOpacity>
-            </View>
-          </Animated.View>
+
+        {/* Footer con botones */}
+        <Animated.View style={defaultStyles.footer} entering={SlideInDown.delay(200)}>
+          <View style={styles.footerContainer}>
+            <TouchableOpacity onPress={clearAll} style={styles.clearButton}>
+              <Text style={styles.clearText}>Borrar todo</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={searchListings} style={styles.searchButton}>
+              <Ionicons
+                name="search-outline"
+                size={24}
+                color="#fff"
+                style={defaultStyles.btnIcon}
+              />
+              <Text style={defaultStyles.btnText}>Buscar</Text>
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
       </ScrollView>
     </GestureHandlerRootView>
   );
@@ -310,9 +318,17 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: Colors.grey,
   },
+  guestName: {
+    fontFamily: 'mon-sb',
+    fontSize: 14,
+  },
+  guestText: {
+    fontFamily: 'mon',
+    fontSize: 14,
+    color: Colors.grey,
+  },
   counterContainer: {
     flexDirection: 'row',
-    gap: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -321,6 +337,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     minWidth: 18,
     textAlign: 'center',
+    marginHorizontal: 8,
   },
   footerContainer: {
     flexDirection: 'row',
@@ -373,6 +390,11 @@ const styles = StyleSheet.create({
     fontFamily: 'mon',
     fontSize: 14,
     color: Colors.primary,
+  },
+  listingGuests: {
+    fontFamily: 'mon',
+    fontSize: 12,
+    color: Colors.dark,
   },
   noResults: {
     marginTop: 20,

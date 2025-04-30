@@ -695,7 +695,7 @@ app.get('/api/get-user', async (req, res) => { // <-- Usa comillas simples
 
 // Nuevo endpoint para buscar listings sin filtrar por "estado"
 app.get('/api/search-listings', async (req, res) => {
-  const { destino } = req.query;
+  const { destino, guests } = req.query;
   let query = `
     SELECT 
       l.id, 
@@ -704,16 +704,24 @@ app.get('/api/search-listings', async (req, res) => {
       l.precio AS price, 
       l.foto1, 
       d.ciudad, 
-      d.distrito 
+      d.distrito,
+      l.invitados_incluidos
     FROM listings l
     LEFT JOIN direccion d ON l.id = d.id
+    WHERE 1=1
   `;
-  let values = [];
+  const values = [];
+
   if (destino) {
-    query += ` WHERE LOWER(d.ciudad) LIKE ?`;
-    const term = '%' + destino.toLowerCase() + '%';
-    values.push(term);
+    query += ` AND LOWER(d.ciudad) LIKE ?`;
+    values.push('%' + destino.toLowerCase() + '%');
   }
+
+ if (guests) {
+   query += ` AND l.invitados_incluidos >= ?`;
+   values.push(parseInt(guests, 10));
+ }
+
   try {
     const [results] = await pool.query(query, values);
     res.json(results);
@@ -722,6 +730,7 @@ app.get('/api/search-listings', async (req, res) => {
     res.status(500).send('Error en el servidor');
   }
 });
+
 
 
 app.post('/api/getOwnerStatus', async (req, res) => {
