@@ -9,7 +9,6 @@ import {
   TextInput,
   ScrollView,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { Calendar, DateObject } from 'react-native-calendars';
 import axios from 'axios';
@@ -26,6 +25,32 @@ interface AvailabilityModalProps {
   listingId: string;
   pricePerNight: number;
 }
+
+// Modal de error profesional
+const ErrorModal = ({
+  visible,
+  message,
+  onClose,
+}: {
+  visible: boolean;
+  message: string;
+  onClose: () => void;
+}) => (
+  <Modal transparent visible={visible} animationType="fade">
+    <View style={styles.errorOverlay}>
+      <View style={styles.errorCard}>
+        <Ionicons name="close-circle-outline" size={48} color="#D9534F" />
+        <Text style={styles.errorTitle}>¡Error!</Text>
+        <Text style={styles.errorMessage}>
+          Verifica que los datos de la tarjeta estén completos y correctamente escritos. Asegúrate de incluir el número, la fecha de vencimiento y el código de seguridad (CVC).
+        </Text>
+        <TouchableOpacity style={styles.errorButton} onPress={onClose}>
+          <Text style={styles.errorButtonText}>Cerrar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  </Modal>
+);
 
 // Modal de confirmación profesional
 const PaymentSuccessModal = ({
@@ -155,8 +180,11 @@ const AvailabilityModal = ({
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
   const [totalAmount, setTotalAmount] = useState(0);
+
   const [showGateway, setShowGateway] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   if (!isLoaded) return null;
 
@@ -187,11 +215,11 @@ const AvailabilityModal = ({
     );
   }
 
-  // ocultar success + availability al cerrar
   const closeSuccess = () => {
     setShowSuccess(false);
     onClose();
   };
+  const closeError = () => setShowError(false);
 
   useEffect(() => {
     if (checkInDate && checkOutDate) {
@@ -223,11 +251,13 @@ const AvailabilityModal = ({
 
   const validate = () => {
     if (!checkInDate || !checkOutDate) {
-      Alert.alert('Error', 'Selecciona fechas');
+      setErrorMessage('Debes seleccionar fecha de check-in y check-out.');
+      setShowError(true);
       return false;
     }
     if (!fullName.trim() || !phone.trim()) {
-      Alert.alert('Error', 'Ingresa nombre y teléfono');
+      setErrorMessage('Ingresa tu nombre completo y un teléfono válido.');
+      setShowError(true);
       return false;
     }
     return true;
@@ -271,7 +301,8 @@ const AvailabilityModal = ({
 
       setShowSuccess(true);
     } catch (err: any) {
-      Alert.alert('Error en pago', err.message);
+      setErrorMessage(err.message);
+      setShowError(true);
     } finally {
       setLoading(false);
     }
@@ -285,8 +316,9 @@ const AvailabilityModal = ({
         onSubmit={onGatewaySubmit}
       />
       <PaymentSuccessModal visible={showSuccess} onClose={closeSuccess} />
+      <ErrorModal visible={showError} message={errorMessage} onClose={closeError} />
 
-      <Modal transparent visible={visible && !showGateway && !showSuccess} animationType="slide">
+      <Modal transparent visible={visible && !showGateway && !showSuccess && !showError} animationType="slide">
         <SafeAreaView style={styles.safeArea}>
           <ScrollView contentContainerStyle={styles.scrollViewContent}>
             <View style={styles.modalContent}>
@@ -433,6 +465,14 @@ const styles = StyleSheet.create({
   successMessage: { fontSize: 16, fontFamily: 'mon', color: Colors.dark, textAlign: 'center', marginBottom: 20 },
   successButton: { backgroundColor: Colors.primary, borderRadius: 6, paddingVertical: 12, paddingHorizontal: 30 },
   successButtonText: { color: '#fff', fontFamily: 'mon-b', fontSize: 16 },
+
+  // error modal
+  errorOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
+  errorCard: { width: '80%', backgroundColor: '#fff', borderRadius: 12, padding: 24, alignItems: 'center', elevation: 12 },
+  errorTitle: { fontSize: 20, fontFamily: 'mon-b', color: '#D9534F', marginVertical: 8 },
+  errorMessage: { fontSize: 16, fontFamily: 'mon', color: Colors.dark, textAlign: 'center', marginBottom: 20 },
+  errorButton: { backgroundColor: '#D9534F', borderRadius: 6, paddingVertical: 12, paddingHorizontal: 30 },
+  errorButtonText: { color: '#fff', fontFamily: 'mon-b', fontSize: 16 },
 
   // login overlay
   loginOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.6)', justifyContent: 'center', alignItems: 'center' },
