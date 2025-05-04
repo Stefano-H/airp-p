@@ -130,7 +130,6 @@ CREATE TABLE IF NOT EXISTS `AlquilaTuEvento`.`ordenes` (
   `confirmado` TINYINT(1) NOT NULL DEFAULT '0',
   `monto_total` DECIMAL(10,2) NOT NULL,
   `moneda` VARCHAR(3) DEFAULT 'EUR',
-  `stripe_payment_id` VARCHAR(255),
   `estado_pago` ENUM('pendiente', 'completado', 'fallido') DEFAULT 'pendiente',
   `metodo_pago` VARCHAR(50),
   PRIMARY KEY (`id`),
@@ -167,7 +166,10 @@ CREATE TABLE IF NOT EXISTS `AlquilaTuEvento`.`usuarios` (
 /* Inserts ejemplo */
 
 /*Apartamento 1 */
-INSERT INTO `AlquilaTuEvento`.`listings` (`id`, `estado`, `nombre`, `descripción`, `precio`, `miniatura`, `foto1`, `proceso_de_llegada`, `invitados_incluidos`, `cancelación`, `habitaciones`, `tipo_de_habitación`, `camas`, `baños`, `cochera`, `parking`, `piscina`, `gimnasio`, `review_scores_rating`, `number_of_reviews`) VALUES ('1', 'España', 'Apartemento en el campo', 'Bienvenidos a nuestro luminoso y cómodo apartamento, ideal para una estancia tranquila y agradable. Ubicado en el centro de la ciudad, estarás a solo unos minutos de las principales atracciones turísticas, restaurantes, tiendas y transporte público, lo que hace de este espacio el lugar perfecto para explorar todo lo que la ciudad tiene para ofrecer.', '50', 'https://a0.muscache.com/im/pictures/miso/Hosting-45306806/original/2c52733a-78b3-421d-a49a-bea959ab86da.jpeg', 'https://a0.muscache.com/im/pictures/miso/Hosting-45306806/original/2c52733a-78b3-421d-a49a-bea959ab86da.jpeg', '1', '40', '1', '4', 'Duplex', '3', '2', '1', '1', '1', '1', '85', '90');
+INSERT INTO `AlquilaTuEvento`.`listings` 
+(`id`, `estado`, `nombre`, `descripción`, `precio`, `miniatura`, `foto1`, `proceso_de_llegada`, `invitados_incluidos`, `cancelación`, `habitaciones`, `tipo_de_habitación`, `camas`, `baños`, `cochera`, `parking`, `piscina`, `gimnasio`, `review_scores_rating`, `number_of_reviews`) 
+VALUES ('1', 'España', 'Apartemento en el campo', 'Bienvenidos a nuestro luminoso y cómodo apartamento, ideal para una estancia tranquila y agradable. Ubicado en el centro de la ciudad, estarás a solo unos minutos de las principales atracciones turísticas, restaurantes, tiendas y transporte público, lo que hace de este espacio el lugar perfecto para explorar todo lo que la ciudad tiene para ofrecer.', 
+'50', 'https://content.elmueble.com/medio/2020/05/04/00505029_20d81336_2000x1333.jpg', 'https://content.elmueble.com/medio/2020/05/04/00505029_20d81336_2000x1333.jpg', '1', '65', '1', '4', 'Duplex', '3', '2', '1', '1', '1', '1', '85', '90');
 
 INSERT INTO `AlquilaTuEvento`.`categorias` (`id`, `Todas`, `Bodas`, `Fiestas`, `Frente_a_la_playa`, `Campo`, `EventosCorporativos`) VALUES ('1', '1', '1', '0', '0', '1', '1');
 
@@ -182,7 +184,10 @@ INSERT INTO `AlquilaTuEvento`.`propietario` (`id`, `foto_url`, `id_usuario`, `no
 
 /*Apartamento 2 */
 
-INSERT INTO `AlquilaTuEvento`.`listings` (`id`, `estado`, `nombre`, `descripción`, `precio`, `miniatura`, `foto1`, `proceso_de_llegada`, `invitados_incluidos`, `cancelación`, `habitaciones`, `tipo_de_habitación`, `camas`, `baños`, `cochera`, `parking`, `piscina`, `gimnasio`, `review_scores_rating`, `number_of_reviews`) VALUES ('2', 'España', 'Apartemento en la playa', 'Bienvenidos a nuestro luminoso y cómodo apartamento, ideal para una estancia tranquila y agradable. Ubicado en el centro de la ciudad, estarás a solo unos minutos de las principales atracciones turísticas, restaurantes, tiendas y transporte público, lo que hace de este espacio el lugar perfecto para explorar todo lo que la ciudad tiene para ofrecer.', '60', 'https://a0.muscache.com/im/pictures/miso/Hosting-702213972376625116/original/a8abb8b3-0846-4c21-9672-dbc76bbbeec7.jpeg', 'https://a0.muscache.com/im/pictures/miso/Hosting-702213972376625116/original/a8abb8b3-0846-4c21-9672-dbc76bbbeec7.jpeg', '1', '40', '1', '4', 'Duplex', '3', '2', '1', '1', '1', '1', '85', '90');
+INSERT INTO `AlquilaTuEvento`.`listings` 
+(`id`, `estado`, `nombre`, `descripción`, `precio`, `miniatura`, `foto1`, `proceso_de_llegada`, `invitados_incluidos`, `cancelación`, `habitaciones`, `tipo_de_habitación`, `camas`, `baños`, `cochera`, `parking`, `piscina`, `gimnasio`, `review_scores_rating`, `number_of_reviews`) 
+VALUES ('2', 'España', 'Apartemento en la playa', 'Bienvenidos a nuestro luminoso y cómodo apartamento, ideal para una estancia tranquila y agradable. Ubicado en el centro de la ciudad, estarás a solo unos minutos de las principales atracciones turísticas, restaurantes, tiendas y transporte público, lo que hace de este espacio el lugar perfecto para explorar todo lo que la ciudad tiene para ofrecer.', 
+'60', 'https://content.elmueble.com/medio/2020/05/04/jardin-con-hamacas-de-fibras-naturales-junto-a-la-piscina-00510296_o_039c92f9_600x402.jpg', 'https://content.elmueble.com/medio/2020/05/04/jardin-con-hamacas-de-fibras-naturales-junto-a-la-piscina-00510296_o_039c92f9_600x402.jpg', '1', '40', '1', '4', 'Duplex', '3', '2', '1', '1', '1', '1', '85', '90');
 
 INSERT INTO `AlquilaTuEvento`.`categorias` (`id`, `Todas`, `Bodas`, `Fiestas`, `Frente_a_la_playa`, `Campo`, `EventosCorporativos`) VALUES ('2', '0', '1', '0', '1', '0', '1');
 
@@ -197,7 +202,7 @@ INSERT INTO `AlquilaTuEvento`.`propietario` (`id`, `foto_url`, `id_usuario`, `no
 
 /*Apartamento 3 */
 INSERT INTO `AlquilaTuEvento`.`listings` (`id`, `estado`, `nombre`, `descripción`, `precio`, `miniatura`, `foto1`, `proceso_de_llegada`, `invitados_incluidos`, `cancelación`, `habitaciones`, `tipo_de_habitación`, `camas`, `baños`, `cochera`, `parking`, `piscina`, `gimnasio`, `review_scores_rating`, `number_of_reviews`) VALUES 
-('3', 'México', 'Casa con vista al mar', 'Hermosa casa con una espectacular vista al mar, equipada con todas las comodidades para una experiencia única. Ideal para familias o grupos de amigos que buscan relajarse y disfrutar.', '120', 'https://a0.muscache.com/im/pictures/miso/Hosting-702213972376625116/original/217efa09-cdb4-43d3-87db-a12264954d9a.jpeg', 'https://a0.muscache.com/im/pictures/miso/Hosting-702213972376625116/original/217efa09-cdb4-43d3-87db-a12264954d9a.jpeg', '2', '6', '1', '3', 'Casa', '4', '3', '1', '1', '1', '1', '90', '150');
+('3', 'México', 'Casa con vista al mar', 'Hermosa casa con una espectacular vista al mar, equipada con todas las comodidades para una experiencia única. Ideal para familias o grupos de amigos que buscan relajarse y disfrutar.', '120', 'https://content.elmueble.com/medio/2020/05/04/jardin-con-cesped-y-piscina-00485507_o_ba700a72_600x352.jpg', 'https://content.elmueble.com/medio/2020/05/04/jardin-con-cesped-y-piscina-00485507_o_ba700a72_600x352.jpg', '2', '6', '1', '3', 'Casa', '4', '3', '1', '1', '1', '1', '90', '150');
 
 INSERT INTO `AlquilaTuEvento`.`categorias` (`id`, `Todas`, `Bodas`, `Fiestas`, `Frente_a_la_playa`, `Campo`, `EventosCorporativos`) VALUES 
 ('3', '1', '0', '1', '0', '1', '0');

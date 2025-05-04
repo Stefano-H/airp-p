@@ -26,6 +26,7 @@ const Page = () => {
     const [isFullScreen, setIsFullScreen] = useState(false);
     const videoRef = useRef<Video>(null);
     const [orientation, setOrientation] = useState(ScreenOrientation.Orientation.PORTRAIT_UP);
+    const [isSharing, setIsSharing] = useState(false);
 
     const scrollRef = useAnimatedRef<Animated.ScrollView>();
     const scrollOffset = useSharedValue(0);
@@ -68,6 +69,21 @@ const Page = () => {
 
     console.log('ID recibido:', id);
 
+    const onSharePress = async () => {
+        try {
+          setIsSharing(true);
+          await Share.share({
+            message: `Mira este apartamento en AlquilaTuEvento: ${API_BASE_URL}/listing/${id}`,
+            url: `${API_BASE_URL}/listing/${id}`,            // some platforms use url
+            title: listing?.nombre,
+          });
+        } catch (err) {
+          console.warn('Share error', err);
+        } finally {
+          setIsSharing(false);
+        }
+      };      
+
 
     useEffect(() => {
         const fetchListing = async () => {
@@ -107,14 +123,16 @@ const Page = () => {
             headerBackground: () => (
                 <Animated.View style={[headerAnimatedStyle, styles.header]}></Animated.View>
             ),
+            // in your navigation.setOptions:
             headerRight: () => (
                 <View style={styles.bar}>
-                    <TouchableOpacity style={styles.roundButton}>
-                        <Ionicons name="share-outline" size={22} color={'#000'} />
-                    </TouchableOpacity>
-                    {/* <TouchableOpacity style={styles.roundButton}>
-                        <Ionicons name="heart-outline" size={22} color={'#000'} />
-                    </TouchableOpacity> */}
+                <TouchableOpacity onPress={onSharePress} style={styles.roundButton}>
+                    <Ionicons
+                    name={isSharing ? 'share' : 'share-outline'}
+                    size={22}
+                    color={isSharing ? Colors.primary : '#000'}
+                    />
+                </TouchableOpacity>
                 </View>
             ),
             headerLeft: () => (

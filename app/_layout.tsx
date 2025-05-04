@@ -130,7 +130,7 @@ function RootLayoutNav() {
         options={{
           presentation: 'transparentModal',
           animation: 'fade',
-          headerTransparent: true,
+          headerTransparent: false,
           headerTitle: () => <ModalHeaderText />,
           headerLeft: () => (
             <TouchableOpacity

@@ -17,6 +17,8 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import Colors from '@/constants/Colors';
 import { defaultStyles } from '@/constants/Styles';
 import API_BASE_URL from '@/utils/apiConfig';
+import { useRouter } from 'expo-router';
+
 
 const guestsGroupsInitial = [
   { name: 'Adultos', text: 'Edades 13 o más', count: 0 },
@@ -34,6 +36,8 @@ const Page = () => {
   const [groups, setGroups] = useState(guestsGroupsInitial);
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
 
   const toggleCard = (cardIndex: number) => {
     setOpenCard(openCard === cardIndex ? null : cardIndex);
@@ -68,20 +72,24 @@ const Page = () => {
   };
 
   const renderListingItem = ({ item }: { item: any }) => (
-    <View style={styles.listingItem}>
+    <TouchableOpacity
+      style={styles.listingItem}
+      onPress={() => router.push(`/listing/${item.id}`)}
+    >
       <Image source={{ uri: item.foto1 }} style={styles.listingImage} />
       <View style={styles.listingInfo}>
         <Text style={styles.listingName}>{item.name}</Text>
         <Text style={styles.listingLocation}>
           {item.ciudad} - {item.distrito}
         </Text>
-        <Text style={styles.listingPrice}>${item.price}</Text>
+        <Text style={styles.listingPrice}>€{item.price}</Text>
         <Text style={styles.listingGuests}>
           Invitados max: {item.invitados_incluidos}
         </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
+  
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -251,7 +259,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    paddingTop: 80,
+    paddingTop: 0,
     backgroundColor: '#fff',
   },
   card: {
