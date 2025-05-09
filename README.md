@@ -43,13 +43,15 @@ Ser la manera más fácil de reservar y alquilar locales para eventos en Latinoa
 
 Primero desde el móvil ir a https://expo.dev/go y seleccionar el SDK la versión “SDK 51” Y “Android” y lo descargamos.
 
-
+![Descripción de la imagen](Media/1.png)
 
 Ahora en el pc debemos tener encendido el xampp.
 
+![Descripción de la imagen](Media/2.png)
+
 abrir el .sql del proyecto, abrirlo en MySQLWorkbench y ejecutar todo el código para crear la base de datos.
 
-
+![Descripción de la imagen](Media/3.png)
 
 ahora en el proyecto pones la dirección ip actual (que sea del internet importante porque debe ser el mismo que use el celular) en el .env en el parámetro “EXPO_PUBLIC_API_IP”
 
